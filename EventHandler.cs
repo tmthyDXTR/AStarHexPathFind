@@ -14,6 +14,32 @@ public class EventHandler : MonoBehaviour
 
 
     // Events
+    public event Action<Tile> onTileSelected;
+    public void SelectTile(Tile tile)
+    {
+        if (onTileSelected != null)
+        {
+            onTileSelected(tile);
+        }
+    }
+
+    public event Action<Unit> onUnitSelected;
+    public void SelectUnit(Unit unit)
+    {
+        if (onUnitSelected != null)
+        {
+            onUnitSelected(unit);
+        }
+    }
+
+    public event Action onDeselectedAll;
+    public void DeselectAll()
+    {
+        if (onDeselectedAll != null)
+        {
+            onDeselectedAll();
+        }
+    }
 
     public event Action<CubeIndex> onHoverOverTile;
     public void HoverOverTile(CubeIndex index)

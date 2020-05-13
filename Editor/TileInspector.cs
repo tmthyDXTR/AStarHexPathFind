@@ -30,6 +30,8 @@ public class TileInspector : Editor
 				{
 					map.ClearTile(child, false);
 					Tile t = child.GetComponent<Tile>();
+					//VisualHandler vH = child.GetComponent<VisualHandler>();
+					//vH.ChangeVisibility(t.visibility);
 					map.SetTilePropTo(t.transform, t.property);
 				}
 				UnityEngine.Debug.Log("Updated all Tiles");
@@ -43,6 +45,9 @@ public class TileInspector : Editor
 			if (map)
 			{
 				map.ClearTile(tile.transform, false);
+				Tile t = tile.GetComponent<Tile>();
+				VisualHandler vH = tile.GetComponent<VisualHandler>();
+				vH.ChangeVisibility(t.visibility);
 				map.SetTilePropTo(tile.transform, tile.property);
 				UnityEngine.Debug.Log("Updated Tile: " + tile.gameObject.name);
 			}

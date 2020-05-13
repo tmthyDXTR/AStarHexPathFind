@@ -34,6 +34,11 @@ public class SelectionManager : MonoBehaviour
         EventHandler.current.onHoverOverTile += UpdateHoveredTile;
     }
 
+    private void OnDestroy()
+    {
+        EventHandler.current.onHoverOverTile -= UpdateHoveredTile;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -54,7 +59,7 @@ public class SelectionManager : MonoBehaviour
                         {
                             if (highlightArea.Contains(hoveredTile))
                             {
-                                currentSelected[0].GetComponent<Unit>().destTilePos = hoveredTile;
+                                currentSelected[0].GetComponent<Unit>().destTile = hoveredTile;
                                 currentSelected[0].GetComponent<Unit>().path = movePath;
                             }
                         }                        
@@ -96,7 +101,7 @@ public class SelectionManager : MonoBehaviour
             if (highlightArea.Contains(hoveredTile))
             {
                 //_aStar.
-                var search = new AStarSearch(_grid, currentSelected[0].GetComponent<Unit>().currTilePos.index, hoveredTile.index); 
+                var search = new AStarSearch(_grid, currentSelected[0].GetComponent<Unit>().currTile.index, hoveredTile.index); 
                 movePath = search.FindPath();
                 // Then Update Path
                 if (movePath.Count > 0)
@@ -130,6 +135,9 @@ public class SelectionManager : MonoBehaviour
         _selectable.IsSelected = true;
         if (obj.layer == 8) // Tile Layer 
         {
+            Tile tile = obj.GetComponent<Tile>();
+            EventHandler.current.SelectTile(tile);
+
             VisualHandler vH = obj.GetComponent<VisualHandler>();
             vH.ChangeVisibility(Tile.Visibility.Selected);
             //if (highlightArea.Contains(hoveredTile))
@@ -139,7 +147,10 @@ public class SelectionManager : MonoBehaviour
         }
         if (obj.layer == 9) // PlayerUnit Layer 
         {
-            highlightArea = obj.GetComponent<Unit>().GetMoveArea();
+            Unit unit = obj.GetComponent<Unit>();
+            EventHandler.current.SelectUnit(unit);
+
+            highlightArea = unit.GetMoveAreaTilesByIndices();
             foreach (var item in highlightArea)
             {
                 VisualHandler vH = item.GetComponent<VisualHandler>();
@@ -156,6 +167,8 @@ public class SelectionManager : MonoBehaviour
 
     private void DeselectAll()
     {
+        EventHandler.current.DeselectAll();
+
         if (currentSelected.Count > 0)
         {
             foreach (GameObject obj in currentSelected)
@@ -176,7 +189,12 @@ public class SelectionManager : MonoBehaviour
             foreach(var item in highlightArea)
             {
                 VisualHandler vH = item.GetComponent<VisualHandler>();
-                vH.ChangeVisibility(Tile.Visibility.Default);
+                if (item.lightFromList.Count > 0)
+                    vH.ChangeVisibility(Tile.Visibility.Default);
+                else
+                {
+                    vH.ChangeVisibility(Tile.Visibility.Hidden);
+                }
             }
         }
         highlightArea.Clear();

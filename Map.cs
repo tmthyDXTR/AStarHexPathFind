@@ -42,11 +42,11 @@ public class Map : MonoBehaviour
         {
             foreach (Transform tile in hex)
             {
-                var newProp = Tile.Property.Default;
-                SetTilePropTo(tile, newProp);
+                ClearTile(tile, true);
             }
         }
     }
+
 
 
 
@@ -103,13 +103,16 @@ public class Map : MonoBehaviour
         meshRen.material = UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
 
         if (setToDefault)
+        {
             tile.property = Tile.Property.Default;
+        }
 
         if (tileTransform.childCount > 0)
         {
             foreach (Transform child in tileTransform)
-            {
-                DestroyImmediate(child.gameObject);
+            { 
+                if (child.name != "Darkness")
+                    DestroyImmediate(child.gameObject);                
             }
         }
     }

@@ -19,8 +19,9 @@ public class VisualHandler : MonoBehaviour
     public Material selectedMat;
     public Material highlightMat;
     public Material pathMat;
+    public GameObject darknessPrefab;
 
-
+    public GameObject darkness;
     private void Start()
     {
         tile = GetComponent<Tile>();
@@ -32,8 +33,14 @@ public class VisualHandler : MonoBehaviour
         selectedMat = (Material)Resources.Load("Materials/SelectedMat");
         highlightMat = (Material)Resources.Load("Materials/MoveMat");
         pathMat = (Material)Resources.Load("Materials/HoverMat");
+        darknessPrefab = (GameObject)Resources.Load("Nature/Darkness");
 
 
+        darkness = (GameObject)Instantiate(Resources.Load("Nature/" + darknessPrefab.name), this.transform);
+        darkness.name = darknessPrefab.name;
+        //darkness.SetActive(false);
+        tile.visibility = Tile.Visibility.Hidden;
+        //tile.Passable = false;
 
         // Events
     }
@@ -63,10 +70,17 @@ public class VisualHandler : MonoBehaviour
         }
         if (visibility == Tile.Visibility.Default && !select.IsSelected)
         {
+            darkness.SetActive(false);
             tile.visibility = Tile.Visibility.Default;
             meshRen.material = originalMat;
         }
 
+        if (visibility == Tile.Visibility.Hidden)
+        {
+            darkness.SetActive(true);
+            //tile.Passable = false;
+            
+        }
         //else
         //{
         //    if (!select.IsSelected)

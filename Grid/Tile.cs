@@ -34,6 +34,8 @@ public class Tile : MonoBehaviour {
 	}
 	public Transform unit;
 
+	public List<Light> lightFromList = new List<Light>();
+
 
 	public static Vector3 Corner(Vector3 origin, float radius, int corner, HexOrientation orientation){
 		float angle = 60 * corner;
