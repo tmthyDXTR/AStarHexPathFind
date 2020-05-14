@@ -14,6 +14,16 @@ public class EventHandler : MonoBehaviour
 
 
     // Events
+    public event Action onLightSourcesUpdated;
+    public void UpdateLightSources()
+    {
+        if (onLightSourcesUpdated != null)
+        {
+            onLightSourcesUpdated();
+        }
+    }
+
+
     public event Action<Tile> onTileSelected;
     public void SelectTile(Tile tile)
     {
@@ -50,8 +60,8 @@ public class EventHandler : MonoBehaviour
         }
     }
 
-    public event Action<CubeIndex, Tile.Visibility> onVisibilityChanged;
-    public void ChangeVisibility(CubeIndex index, Tile.Visibility visibility)
+    public event Action<CubeIndex, Tile.SelectionStatus> onVisibilityChanged;
+    public void ChangeVisibility(CubeIndex index, Tile.SelectionStatus visibility)
     {
         if (onVisibilityChanged != null)
         {

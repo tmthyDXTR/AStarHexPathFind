@@ -28,7 +28,7 @@ public class UnitPanel : MonoBehaviour
         if (selectedUnit)
         {
             unitName.text = $"Unit: {selectedUnit.gameObject.name}";
-            unitMoves.text = $"Moves: {selectedUnit.moveRange}";
+            unitMoves.text = $"Moves: {selectedUnit.remainingMoves}";
             Debug.Log("Updated Unit panel");
         }
         else

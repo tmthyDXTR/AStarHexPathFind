@@ -63,6 +63,7 @@ public class SelectionManager : MonoBehaviour
                                 currentSelected[0].GetComponent<Unit>().path = movePath;
                             }
                         }                        
+
                         DeselectAll();
                         Select(clickedObj.gameObject);                                                     
                     }
@@ -82,8 +83,8 @@ public class SelectionManager : MonoBehaviour
     {
         if (hoveredTile)
         {
-            VisualHandler vH = hoveredTile.GetComponent<VisualHandler>();
-            vH.ChangeVisibility(Tile.Visibility.Default);
+            SelectionStatusHandler vH = hoveredTile.GetComponent<SelectionStatusHandler>();
+            vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
         }
         hoveredTile = _grid.TileAt(index);
         // This event gets picked up by the visual handlers of hovered tile and
@@ -95,8 +96,8 @@ public class SelectionManager : MonoBehaviour
         {
             foreach (var item in highlightArea)
             {
-                VisualHandler vH = item.GetComponent<VisualHandler>();
-                vH.ChangeVisibility(Tile.Visibility.Highlighted);
+                SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
+                vH.ChangeSelectionStatus(Tile.SelectionStatus.Highlighted);
             }
             if (highlightArea.Contains(hoveredTile))
             {
@@ -109,14 +110,14 @@ public class SelectionManager : MonoBehaviour
                     foreach (var item in movePath)
                     {
                         Tile tile = _grid.TileAt(item);
-                        VisualHandler vH = tile.GetComponent<VisualHandler>();
-                        vH.ChangeVisibility(Tile.Visibility.Path);
+                        SelectionStatusHandler vH = tile.GetComponent<SelectionStatusHandler>();
+                        vH.ChangeSelectionStatus(Tile.SelectionStatus.Path);
                     }
                 }
             }           
         }
-        VisualHandler vHnew = hoveredTile.GetComponent<VisualHandler>();
-        vHnew.ChangeVisibility(Tile.Visibility.Hovered);
+        SelectionStatusHandler vHnew = hoveredTile.GetComponent<SelectionStatusHandler>();
+        vHnew.ChangeSelectionStatus(Tile.SelectionStatus.Hovered);
     }
 
     public void SetSelectManagerActive(bool value)
@@ -138,8 +139,8 @@ public class SelectionManager : MonoBehaviour
             Tile tile = obj.GetComponent<Tile>();
             EventHandler.current.SelectTile(tile);
 
-            VisualHandler vH = obj.GetComponent<VisualHandler>();
-            vH.ChangeVisibility(Tile.Visibility.Selected);
+            SelectionStatusHandler vH = obj.GetComponent<SelectionStatusHandler>();
+            vH.ChangeSelectionStatus(Tile.SelectionStatus.Selected);
             //if (highlightArea.Contains(hoveredTile))
             //{
             //    currentSelected[0].GetComponent<Unit>().destTilePos = hoveredTile;
@@ -153,8 +154,8 @@ public class SelectionManager : MonoBehaviour
             highlightArea = unit.GetMoveAreaTilesByIndices();
             foreach (var item in highlightArea)
             {
-                VisualHandler vH = item.GetComponent<VisualHandler>();
-                vH.ChangeVisibility(Tile.Visibility.Highlighted);
+                SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
+                vH.ChangeSelectionStatus(Tile.SelectionStatus.Highlighted);
             }
         }
         // Add object to selection array if not selected yet
@@ -177,8 +178,8 @@ public class SelectionManager : MonoBehaviour
                 _selectable.IsSelected = false;
                 if (obj.layer == 8)
                 {
-                    VisualHandler vH = obj.GetComponent<VisualHandler>();
-                    vH.ChangeVisibility(Tile.Visibility.Default);
+                    SelectionStatusHandler vH = obj.GetComponent<SelectionStatusHandler>();
+                    vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
                 }                
             }
             Debug.Log("Deselected all current selected objects");
@@ -188,13 +189,12 @@ public class SelectionManager : MonoBehaviour
         {
             foreach(var item in highlightArea)
             {
-                VisualHandler vH = item.GetComponent<VisualHandler>();
-                if (item.lightFromList.Count > 0)
-                    vH.ChangeVisibility(Tile.Visibility.Default);
-                else
-                {
-                    vH.ChangeVisibility(Tile.Visibility.Hidden);
-                }
+                SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();                
+                vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
+                //else
+                //{
+                //    vH.ChangeVisibility(Tile.Visibility.Hidden);
+                //}
             }
         }
         highlightArea.Clear();

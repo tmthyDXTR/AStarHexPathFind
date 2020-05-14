@@ -9,19 +9,19 @@ public class Tile : MonoBehaviour {
 		Grass,
 		Tree,
 		Rock,
+		Bonfire,
 	}
 	public Property property;
 
-	public enum Visibility
+	public enum SelectionStatus
 	{
 		Default,
 		Hovered,
 		Highlighted,
 		Selected,
 		Path,
-		Hidden,
 	}
-	public Visibility visibility;	
+	public SelectionStatus selectionStatus;	
 
 	[SerializeField]
 	private bool passable;
@@ -34,7 +34,16 @@ public class Tile : MonoBehaviour {
 	}
 	public Transform unit;
 
-	public List<Light> lightFromList = new List<Light>();
+	[SerializeField]
+	private bool isDark;
+	public bool IsDark
+	{
+		get { return isDark; }
+		set
+		{
+			isDark = value;
+		}
+	}
 
 
 	public static Vector3 Corner(Vector3 origin, float radius, int corner, HexOrientation orientation){

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 using System;
+using System.Runtime.CompilerServices;
+using System.Reflection;
 
 /// <summary>
 /// This class handles unit specific stuff like
@@ -13,10 +15,11 @@ public class Unit : MonoBehaviour
     public Tile currTile;
     public Tile destTile;
     public int moveRange;
+    public int remainingMoves = 3;
 
     // Internal Variables
     private Grid _grid;
-    private Light _light;
+    private LightSource _light;
     [SerializeField]
     private bool areaCalcStarted = false;
     [SerializeField]
@@ -27,15 +30,19 @@ public class Unit : MonoBehaviour
     void Start()
     {
         _grid = GameObject.Find("HexGen").GetComponent<Grid>();
-        _light = GetComponent<Light>();
+        _light = GetComponent<LightSource>();
 
 
     // Calc the move area on new Thread
     StartThreadMoveAreaCalculation(currTile.index, moveRange);
+        //StartCoroutine(SysHelper.WaitForAndExecute(1f, () => StartThreadMoveAreaCalculation(currTile.index, moveRange)));
     }
 
     void Update()
     {
+
+
+        // Move along path if destination set
         if (destTile)
         {
             if (!GetComponent<PathFollow>().enabled)
@@ -43,8 +50,8 @@ public class Unit : MonoBehaviour
                 FollowPath(path);
                 // Must check if moveRange is greater 0
                 // otherwise its stuck at start calculation
-                moveRange -= path.Count;
-                if (moveRange < 1)
+                remainingMoves--;
+                if (remainingMoves < 1)
                     moveArea.Clear();
                 else
                     StartThreadMoveAreaCalculation(destTile.index, moveRange);
@@ -53,14 +60,13 @@ public class Unit : MonoBehaviour
             if (Vector3.Distance(this.transform.position, destTile.transform.position) <= 0.05f)
             {
                 _light.lightRaySent = false;
-
                 destTile = null;
                 path.Clear();
                 GetComponent<PathFollow>().enabled = false;
                 Debug.Log("Path finished");
             }
         }        
-    }
+    }    
 
     private void StartThreadMoveAreaCalculation(CubeIndex start, int moveRange)
     {
@@ -86,20 +92,6 @@ public class Unit : MonoBehaviour
         Debug.Log("Calculated new Move Area with range: " + moveRange);
     }
 
-    private IEnumerator MoveToNextNode(CubeIndex pathNode)
-    {
-        var target = _grid.TileAt(pathNode).transform.position;
-        while (Vector3.Distance(this.transform.position, target) > 0.05f)
-        {
-            Debug.Log("Moving to next node");
-            transform.position = Vector3.Lerp(transform.position, target, 0.3f * Time.deltaTime);
-
-            yield return null;
-        }
-        destTile = null;
-        Debug.Log("Node reached");
-        yield return null;
-    }
 
     // Public Methods
     public List<Tile> GetMoveAreaTilesByIndices()
@@ -107,13 +99,11 @@ public class Unit : MonoBehaviour
         var ret = new List<Tile>();
         foreach (var index in moveArea)
         {
-            if (!index.Equals(currTile.index))
+            if (!index.Equals(currTile.index)) // && _light.GetLightArea().Contains(index)
                 ret.Add(_grid.TileAt(index));
         }
         return ret;
     }
-
-
 
 
 

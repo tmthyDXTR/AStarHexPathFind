@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 /// during different selection and ui states as 
 /// "selected", "highlighted", "path" ...
 /// </summary>
-public class VisualHandler : MonoBehaviour
+public class SelectionStatusHandler : MonoBehaviour
 {
     private Tile tile;
     private Selectable select;
@@ -38,56 +38,40 @@ public class VisualHandler : MonoBehaviour
 
         darkness = (GameObject)Instantiate(Resources.Load("Nature/" + darknessPrefab.name), this.transform);
         darkness.name = darknessPrefab.name;
+        tile.IsDark = true;
         //darkness.SetActive(false);
-        tile.visibility = Tile.Visibility.Hidden;
         //tile.Passable = false;
 
         // Events
     }
 
-    public void ChangeVisibility(Tile.Visibility visibility)
+    public void ChangeSelectionStatus(Tile.SelectionStatus selectionStatus)
     {
         
-        if (visibility == Tile.Visibility.Hovered && !select.IsSelected)
+        if (selectionStatus == Tile.SelectionStatus.Hovered && !select.IsSelected)
         {
-            tile.visibility = Tile.Visibility.Hovered;
+            tile.selectionStatus = Tile.SelectionStatus.Hovered;
             meshRen.material = hoverMat;
         }
-        if (visibility == Tile.Visibility.Selected)
+        if (selectionStatus == Tile.SelectionStatus.Selected && select.IsSelected)
         {
-            tile.visibility = Tile.Visibility.Selected;
+            tile.selectionStatus = Tile.SelectionStatus.Selected;
             meshRen.material = selectedMat;
         }
-        if (visibility == Tile.Visibility.Highlighted)
+        if (selectionStatus == Tile.SelectionStatus.Highlighted)
         {
-            tile.visibility = Tile.Visibility.Highlighted;
+            tile.selectionStatus = Tile.SelectionStatus.Highlighted;
             meshRen.material = highlightMat;
         }
-        if (visibility == Tile.Visibility.Path)
+        if (selectionStatus == Tile.SelectionStatus.Path)
         {
-            tile.visibility = Tile.Visibility.Path;
+            tile.selectionStatus = Tile.SelectionStatus.Path;
             meshRen.material = pathMat;
         }
-        if (visibility == Tile.Visibility.Default && !select.IsSelected)
+        if (selectionStatus == Tile.SelectionStatus.Default && !select.IsSelected) //  
         {
-            darkness.SetActive(false);
-            tile.visibility = Tile.Visibility.Default;
+            tile.selectionStatus = Tile.SelectionStatus.Default;
             meshRen.material = originalMat;
         }
-
-        if (visibility == Tile.Visibility.Hidden)
-        {
-            darkness.SetActive(true);
-            //tile.Passable = false;
-            
-        }
-        //else
-        //{
-        //    if (!select.IsSelected)
-        //    {
-        //        tile.visibility = Tile.Visibility.Default;
-        //        meshRen.material = originalMat;
-        //    }            
-        //}
     }
 }

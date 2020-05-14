@@ -175,7 +175,7 @@ public class Grid : MonoBehaviour {
 			{
 				foreach (var neighbour in Neighbours(index))
 				{
-					if (neighbour.Passable)
+					if (neighbour.Passable) // && neighbour.visibility != Tile.Visibility.Hidden
 					{
 						visited.Add(neighbour.index);
 						fringes[i].Add(neighbour.index);
@@ -341,7 +341,7 @@ public class Grid : MonoBehaviour {
 		
 		go.layer = 8; // Tile Layer
 		go.AddComponent<Selectable>();
-		go.AddComponent<VisualHandler>();
+		go.AddComponent<SelectionStatusHandler>();
 		go.AddComponent<MouseHover>();
 
 		if(addColliders)

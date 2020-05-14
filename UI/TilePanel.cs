@@ -27,7 +27,7 @@ public class TilePanel : MonoBehaviour
         selectedTile = tile;
         if (selectedTile)
         {
-            tileName.text = $"Unit: {tile.property}";
+            tileName.text = $"Tile: {tile.property}";
             tileEffect.text = $"Effect: blabla";
             Debug.Log("Updated Tile panel");
         }
