@@ -14,8 +14,53 @@ public class EventHandler : MonoBehaviour
 
 
     // Events
+    public event Action onFireConsumed;
+    public void ConsumeFire()
+    {
+        if (onFireConsumed != null)
+        {
+            onFireConsumed();
+        }
+    }
+
+    public event Action onFireFed;
+    public void FireFed()
+    {
+        if (onFireFed != null)
+        {
+            onFireFed();
+        }
+    }
+
+    public event Action onMoveAreaCalculated;
+    public void MoveAreaCalculated()
+    {
+        if (onMoveAreaCalculated != null)
+        {
+            onMoveAreaCalculated();
+        }
+    }
+
+    public event Action onResourceDestroyed;
+    public void ResourceDestroyed()
+    {
+        if (onResourceDestroyed != null)
+        {
+            onResourceDestroyed();
+        }
+    }
+
+    public event Action<Unit, ResourceManager.ResourceType> onResourceGathered;
+    public void ResourceGathered(Unit unit, ResourceManager.ResourceType type)
+    {
+        if (onResourceGathered != null)
+        {
+            onResourceGathered(unit, type);
+        }
+    }
+
     public event Action onLightSourcesUpdated;
-    public void UpdateLightSources()
+    public void LightSourcesUpdated()
     {
         if (onLightSourcesUpdated != null)
         {
@@ -25,7 +70,7 @@ public class EventHandler : MonoBehaviour
 
 
     public event Action<Tile> onTileSelected;
-    public void SelectTile(Tile tile)
+    public void TileSelected(Tile tile)
     {
         if (onTileSelected != null)
         {
@@ -51,12 +96,12 @@ public class EventHandler : MonoBehaviour
         }
     }
 
-    public event Action<CubeIndex> onHoverOverTile;
-    public void HoverOverTile(CubeIndex index)
+    public event Action<Tile> onHoverOverTile;
+    public void HoverOverTile(Tile tile)
     {
         if (onHoverOverTile != null)
         {
-            onHoverOverTile(index);
+            onHoverOverTile(tile);
         }
     }
 

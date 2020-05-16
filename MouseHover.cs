@@ -13,7 +13,7 @@ public class MouseHover : MonoBehaviour
         if (gameObject.layer == 8) // Tile Layer 
         {
             Tile tile = GetComponent<Tile>();
-            EventHandler.current.HoverOverTile(tile.index);
+            EventHandler.current.HoverOverTile(tile);
         }
     }
 }

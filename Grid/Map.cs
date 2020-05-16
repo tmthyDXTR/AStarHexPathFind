@@ -15,7 +15,8 @@ public class Map : MonoBehaviour
     public GameObject treePrefab;
     public GameObject rockPrefab;
     public GameObject bonfirePrefab;
-
+    public GameObject woodStoragePrefab;
+    public GameObject cauldronPrefab;
 
     public Grid _grid;
     void Start()
@@ -27,33 +28,29 @@ public class Map : MonoBehaviour
         grassMaterial = (Material)Resources.Load("Materials/GrassMat");
         rockMaterial = (Material)Resources.Load("Materials/RockMat");
         dirtMaterial = (Material)Resources.Load("Materials/DirtMat");
+        
 
-
-        // Cleanup of map and clear tils in buildings
-        foreach (Transform child in hex.transform)
-        {
-            Tile t = child.GetComponent<Tile>();
-            if (t.property == Tile.Property.Bonfire)
-            {
-                var buildingSizeTiles = _grid.TilesInRange(t.index, 1);
-                buildingSizeTiles.Remove(t);
-                SetBuildingSize(buildingSizeTiles);
-                break;
-            }
-        }
     }
-    private void SetBuildingSize(List<Tile> buildingSizeTiles)
-    {
+
+
+
+    public static void SetBuildingSize(List<Tile> buildingSizeTiles, Tile.Property buildingProperty)
+    {// For cleanup of tiles within a buildings tiles (spanning over several tiles)
         foreach (var _t in buildingSizeTiles)
         {
             ClearTile(_t.transform, false);
             MeshRenderer t_meshRen = _t.GetComponent<MeshRenderer>();
+            var dirtMaterial = (Material)Resources.Load("Materials/DirtMat");
             t_meshRen.material = (dirtMaterial) ? dirtMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
             SelectionStatusHandler vH = _t.GetComponent<SelectionStatusHandler>();
             vH.originalMat = t_meshRen.material;
-            _t.property = Tile.Property.Bonfire;
+            _t.property = buildingProperty;
             _t.Passable = false;
-            _t.tag = "BuildingBonfire";
+            _t.tag = TagHandler.buildingBonfireString;
+            if (_t.GetComponent<Resource>())
+            {
+                Destroy(_t.GetComponent<Resource>());
+            }
         }
     }
 
@@ -92,6 +89,7 @@ public class Map : MonoBehaviour
         Bonfire fire = bonfire.GetComponent<Bonfire>();
         fire.currTile = tile;
         tile.Passable = false;
+        tile.tag = TagHandler.buildingBonfireString;
         MeshRenderer t_meshRen = tile.GetComponent<MeshRenderer>();
         t_meshRen.material = (dirtMaterial) ? dirtMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
         SelectionStatusHandler vH = tile.GetComponent<SelectionStatusHandler>();
@@ -111,20 +109,21 @@ public class Map : MonoBehaviour
             meshRen.material = (grassMaterial) ? grassMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
             SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
             tileMat.originalMat = meshRen.material;
-            tile.tag = "ResourceTree";
-            var randomOffset = Random.Range(0.4f, 0.8f);
+            tile.tag = TagHandler.resourceWoodString;
+            var randomOffset = Random.Range(0.05f, 0.15f);
+            var randomDir = Random.insideUnitCircle.normalized;
             for (int i = 0; i < 2; i++)
             {
-                GameObject tree = Instantiate(Resources.Load("Nature/" + treePrefab.name), tileTransform.position, Quaternion.Euler(new Vector3(Random.Range(-5f, 5f), Random.Range(0, 360), Random.Range(-5f, 5f))), tileTransform) as GameObject;
+                GameObject tree = Instantiate(Resources.Load("Nature/" + treePrefab.name), tileTransform.position, Quaternion.Euler(new Vector3(Random.Range(-7f, 7f), Random.Range(0, 360), Random.Range(-7f, 7f))), tileTransform) as GameObject;
                 tree.name = treePrefab.name;
-                var randomScale = Random.Range(0.75f, 1.1f);
+                var randomScale = Random.Range(0.75f, 1.15f);
                 if (i == 0)
                 {
-                    tree.transform.position += new Vector3(randomOffset, 0, randomOffset);
+                    tree.transform.position += Vector3.forward * randomOffset + new Vector3(randomDir.x, 0, randomDir.y);
                 }
                 else
                 {
-                    tree.transform.position -= new Vector3(randomOffset,0, randomOffset);
+                    tree.transform.position -= Vector3.forward * randomOffset + new Vector3(randomDir.x, 0, randomDir.y);
                 }
                 tree.transform.localScale += new Vector3(randomScale, randomScale, randomScale);                
             }           
@@ -136,21 +135,41 @@ public class Map : MonoBehaviour
             SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
             tileMat.originalMat = meshRen.material;
             tile.Passable = true;
-            tile.tag = "Ground";
+            tile.tag = TagHandler.walkGroundString;
         }
         if (newProperty == Tile.Property.Rock)
         {
             meshRen.material = (rockMaterial) ? rockMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
             SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
             tileMat.originalMat = meshRen.material;
-            tile.tag = "ResourceRock";
+            tile.tag = TagHandler.resourceStoneString;
             GameObject rock = Instantiate(Resources.Load("Nature/" + rockPrefab.name), tileTransform.position, Quaternion.identity, tileTransform) as GameObject;
             rock.name = rockPrefab.name;
             rock.transform.localScale += new Vector3(1f, 1f, 1f);
             tile.Passable = false;
         }
 
-        
+        if (newProperty == Tile.Property.WoodStorage)
+        {
+            meshRen.material = (dirtMaterial) ? dirtMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+            SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
+            tileMat.originalMat = meshRen.material;
+            tile.tag = TagHandler.buildingWoodStorageString;
+            GameObject woodStorage = Instantiate(Resources.Load("Buildings/" + woodStoragePrefab.name), tileTransform.position, Quaternion.Euler(0, 120, 0), tileTransform) as GameObject;
+            woodStorage.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            woodStorage.name = woodStoragePrefab.name;
+        }
+        if (newProperty == Tile.Property.Cauldron)
+        {
+            meshRen.material = (dirtMaterial) ? dirtMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+            SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
+            tileMat.originalMat = meshRen.material;
+            tile.tag = TagHandler.buildingCauldronString;
+            GameObject cauldron = Instantiate(Resources.Load("Buildings/" + cauldronPrefab.name), tileTransform.position, Quaternion.identity, tileTransform) as GameObject;
+            tile.Passable = false;
+            cauldron.name = woodStoragePrefab.name;
+        }
+
 
 
         if (newProperty == Tile.Property.Default)
@@ -162,7 +181,7 @@ public class Map : MonoBehaviour
     }
 
 
-    public void ClearTile(Transform tileTransform, bool setToDefault)
+    public static void ClearTile(Transform tileTransform, bool setToDefault)
     {
         Tile tile = tileTransform.GetComponent<Tile>();
         MeshRenderer meshRen = tileTransform.GetComponent<MeshRenderer>();
@@ -173,14 +192,18 @@ public class Map : MonoBehaviour
             tile.property = Tile.Property.Default;
         }
 
-        if (tileTransform.childCount > 0)
+        var tempChildList = tileTransform.Cast<Transform>().ToList();
+        foreach (var child in tempChildList)
         {
-            foreach (Transform child in tileTransform)
-            { 
-                if (child.name != "Darkness")
-                    DestroyImmediate(child.gameObject);                
-            }
+            DestroyImmediate(child.gameObject);
         }
+        for (int i = tileTransform.transform.childCount; i > 0; --i)
+        {
+            DestroyImmediate(tileTransform.transform.GetChild(0).gameObject);
+        }
+
+        //Debug.Log("Cleared Tile: " + tileTransform);
+    
     }
 
     #endregion

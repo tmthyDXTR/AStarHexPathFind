@@ -31,7 +31,7 @@ public class TileInspector : Editor
 			{
 				foreach(Transform child in tiles)
 				{
-					map.ClearTile(child, false);
+					Map.ClearTile(child, false);
 					Tile t = child.GetComponent<Tile>();
 					//VisualHandler vH = child.GetComponent<VisualHandler>();
 					//vH.ChangeVisibility(t.visibility);
@@ -55,7 +55,7 @@ public class TileInspector : Editor
 			if (map)
 			{
 				foreach (Transform child in tiles)
-					map.ClearTile(child, false);
+					Map.ClearTile(child, false);
 				UnityEngine.Debug.Log("Cleared all Tiles");
 
 			}
@@ -66,7 +66,7 @@ public class TileInspector : Editor
 		{
 			if (map)
 			{
-				map.ClearTile(tile.transform, false);
+				Map.ClearTile(tile.transform, false);
 				Tile t = tile.GetComponent<Tile>();
 				SelectionStatusHandler vH = tile.GetComponent<SelectionStatusHandler>();
 				vH.ChangeSelectionStatus(t.selectionStatus);

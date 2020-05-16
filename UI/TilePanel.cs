@@ -9,13 +9,15 @@ public class TilePanel : MonoBehaviour
     private Tile selectedTile;
 
     private TextMeshProUGUI tileName;
-    private TextMeshProUGUI tileEffect;
+    private TextMeshProUGUI tileResourceAmount;
+    private TextMeshProUGUI tileResourceWorkCost;
 
 
     void OnEnable()
     {
         tileName = transform.Find("TileNameText").GetComponent<TextMeshProUGUI>();
-        tileEffect = transform.Find("TileEffectText").GetComponent<TextMeshProUGUI>();
+        tileResourceAmount = transform.Find("TileResourceAmountText").GetComponent<TextMeshProUGUI>();
+        tileResourceWorkCost = transform.Find("TileResourceWorkCostText").GetComponent<TextMeshProUGUI>();
 
 
         //EventHandler.current.onTi += UpdatePanel;
@@ -28,7 +30,11 @@ public class TilePanel : MonoBehaviour
         if (selectedTile)
         {
             tileName.text = $"Tile: {tile.property}";
-            tileEffect.text = $"Effect: blabla";
+            if(selectedTile.GetComponent<Resource>())
+            {
+                tileResourceAmount.text = $"Amount: {tile.GetComponent<Resource>().Amount}";
+                tileResourceWorkCost.text = $"WorkCost: {tile.GetComponent<Resource>().WorkCost}";
+            }                
             Debug.Log("Updated Tile panel");
         }
         else

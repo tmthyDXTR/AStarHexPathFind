@@ -10,6 +10,8 @@ public class Tile : MonoBehaviour {
 		Tree,
 		Rock,
 		Bonfire,
+		WoodStorage,
+		Cauldron,
 	}
 	public Property property;
 

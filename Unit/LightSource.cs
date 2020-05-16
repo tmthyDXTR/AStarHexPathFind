@@ -17,9 +17,38 @@ public class LightSource : MonoBehaviour
 
     [SerializeField]
     private int lightRange = 3;
+    public int LightRange
+    {
+        get { return lightRange; }
+        set
+        {
+            if (value >= 0 && value <= 20)
+            {
+                lightRange = value;
+                LightRaySent = false;
+            }
+            else
+            {
+                Debug.Log("lightRange cant be < 0 & > 20");
+            }
+        }
+    }
     private List<Tile> lightArea = new List<Tile>(); // This light sources individual lit area
+    
     [SerializeField]
-    public bool lightRaySent = false;
+    private bool lightRaySent = false;
+    public bool LightRaySent
+    { 
+        get {return lightRaySent; }
+        set
+        {
+            lightRaySent = value;
+            if (!lightRaySent)
+            {
+                SendLightRays(lightRange);
+            }
+        }
+    }
     void Start()
     {
         if (GetComponent<Unit>())
@@ -29,24 +58,23 @@ public class LightSource : MonoBehaviour
 
         _grid = GameObject.Find("HexGen").GetComponent<Grid>();
         _lightManager = GameObject.Find("LightManager").GetComponent<LightManager>();
+        StartCoroutine(SysHelper.WaitForAndExecute(.5f, () => SendLightRays(lightRange)));
     }
 
-    private void Update()
+
+    private void SendLightRays(int lightRange)
     {
-        if (!lightRaySent)
+        CubeIndex index = new CubeIndex(0, 0, 0);
+        if (bonfire)
         {
-            CubeIndex index = new CubeIndex(0, 0, 0);
-            if (bonfire)
-            {
-                index = bonfire.currTile.index;
-            }
-            if (lightObject)
-            {
-                index = lightObject.currTile.index;
-            }
-            //StartThreadLightAreaCalculation(lightObject.currTile.index, lightRange);
-            CalculateNewLightArea(index, lightRange);
+            index = bonfire.currTile.index;
         }
+        if (lightObject)
+        {
+            index = lightObject.currTile.index;
+        }
+        //StartThreadLightAreaCalculation(lightObject.currTile.index, lightRange);
+        CalculateNewLightArea(index, lightRange);
     }
 
     public HashSet<CubeIndex> GetLightArea()
@@ -91,8 +119,8 @@ public class LightSource : MonoBehaviour
                 _lightManager.litTiles[tile]++;
             }
         }
-        lightRaySent = true;
-        EventHandler.current.UpdateLightSources();
+        LightRaySent = true;
+        EventHandler.current.LightSourcesUpdated();
 
         Debug.Log("Calculated new Light Area with range: " + lightRange);
     }

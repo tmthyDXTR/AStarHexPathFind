@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using System.Threading;
-using System;
-using System.Runtime.CompilerServices;
-using System.Reflection;
+using UnityEngine;
 
 /// <summary>
 /// This class handles unit specific stuff like
@@ -18,24 +14,45 @@ public class Unit : MonoBehaviour
     public int remainingMoves = 3;
 
     // Internal Variables
+    private SelectionManager _selection;
     private Grid _grid;
     private LightSource _light;
-    [SerializeField]
     private bool areaCalcStarted = false;
     [SerializeField]
     private bool areaCalcFinished = false;
+    public bool MoveAreaCalculated
+    {
+        get { return areaCalcFinished; }
+        set
+        {
+            areaCalcFinished = value;
+            if (areaCalcFinished)
+            {
+                //_selection.UpdateNeighboursAndHighlightArea();
+                //EventHandler.current.MoveAreaCalculated();
+            }
+        }
+    }
+
     private HashSet<CubeIndex> moveArea = new HashSet<CubeIndex>();
     public List<CubeIndex> path = new List<CubeIndex>();
 
     void Start()
     {
+        _selection = GameObject.Find("SelectionManager").GetComponent<SelectionManager>();
         _grid = GameObject.Find("HexGen").GetComponent<Grid>();
         _light = GetComponent<LightSource>();
 
 
-    // Calc the move area on new Thread
-    StartThreadMoveAreaCalculation(currTile.index, moveRange);
-        //StartCoroutine(SysHelper.WaitForAndExecute(1f, () => StartThreadMoveAreaCalculation(currTile.index, moveRange)));
+        EventHandler.current.onResourceDestroyed += () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
+        // Calc the move area on new Thread
+        //StartThreadMoveAreaCalculation(currTile.index, moveRange);
+        StartCoroutine(SysHelper.WaitForAndExecute(0.1f, () => StartThreadMoveAreaCalculation(currTile.index, moveRange)));
+    }
+
+    private void OnDisable()
+    {
+        EventHandler.current.onResourceDestroyed -= () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
     }
 
     void Update()
@@ -47,6 +64,7 @@ public class Unit : MonoBehaviour
         {
             if (!GetComponent<PathFollow>().enabled)
             {
+                currTile.Passable = true;
                 FollowPath(path);
                 // Must check if moveRange is greater 0
                 // otherwise its stuck at start calculation
@@ -59,22 +77,23 @@ public class Unit : MonoBehaviour
             // Check if target reached
             if (Vector3.Distance(this.transform.position, destTile.transform.position) <= 0.05f)
             {
-                _light.lightRaySent = false;
+                _light.LightRaySent = false;
                 destTile = null;
                 path.Clear();
                 GetComponent<PathFollow>().enabled = false;
                 Debug.Log("Path finished");
+                EventHandler.current.MoveAreaCalculated();
             }
-        }        
-    }    
+        }
+    }
 
-    private void StartThreadMoveAreaCalculation(CubeIndex start, int moveRange)
+    public void StartThreadMoveAreaCalculation(CubeIndex start, int moveRange)
     {
         Thread myThread = new Thread(() => CalculateNewMoveArea(start, moveRange));
         myThread.Start();
         Debug.Log("Started new Thread to calculate move area");
         areaCalcStarted = true;
-        areaCalcFinished = false;
+        MoveAreaCalculated = false;
     }
 
     private void FollowPath(List<CubeIndex> path)
@@ -87,9 +106,10 @@ public class Unit : MonoBehaviour
     public void CalculateNewMoveArea(CubeIndex index, int moveRange)
     {
         moveArea = _grid.TilesInMoveRange(index, moveRange);
-        areaCalcFinished = true;
+        MoveAreaCalculated = true; // Triggers event to update highlghted area
         areaCalcStarted = false;
         Debug.Log("Calculated new Move Area with range: " + moveRange);
+        
     }
 
 
@@ -116,6 +136,7 @@ public class Unit : MonoBehaviour
             Tile tile = other.gameObject.GetComponent<Tile>();
             tile.unit = this.transform;
             currTile = tile;
+            tile.Passable = false;
         }
     }
     private void OnTriggerExit(Collider other)
@@ -124,6 +145,7 @@ public class Unit : MonoBehaviour
         {
             Tile tile = other.gameObject.GetComponent<Tile>();
             tile.unit = null;
+            tile.Passable = true;
         }
     }
 }

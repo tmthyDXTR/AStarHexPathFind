@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using UnityEditorInternal;
 using UnityEngine;
 
 public class SelectionManager : MonoBehaviour
@@ -11,18 +13,18 @@ public class SelectionManager : MonoBehaviour
     /// 
     private Grid _grid;
     private Selectable _selectable;
-    //private AStarSearch _aStar;
 
     #region Variables
     [SerializeField]
     public bool isActive = true;
     [SerializeField]
-    private Tile hoveredTile;
+    public static Tile hoveredTile;
 
     public List<GameObject> currentSelected = new List<GameObject>();
     public List<Tile> highlightArea = new List<Tile>();
-    public List<CubeIndex> movePath = new List<CubeIndex>();
+    public List<Tile> neighbours = new List<Tile>();
 
+    public List<CubeIndex> movePath = new List<CubeIndex>();
 
     #endregion
 
@@ -32,11 +34,20 @@ public class SelectionManager : MonoBehaviour
         //_aStar = _grid.GetComponent<AStarSearch>();
         // Events
         EventHandler.current.onHoverOverTile += UpdateHoveredTile;
+        EventHandler.current.onMoveAreaCalculated += UpdateNeighboursAndHighlightArea;
+        // Very important for "instant" updating highlight area after resource tile got passable because of 
+        // resource depletion
+        EventHandler.current.onResourceDestroyed += () => StartCoroutine(SysHelper.WaitForAndExecute(0.1f, () => UpdateNeighboursAndHighlightArea()));
+        EventHandler.current.onResourceDestroyed += () => StartCoroutine(SysHelper.WaitForAndExecute(0.2f, () => UpdateHoveredTile(hoveredTile)));
+
+
     }
 
     private void OnDestroy()
     {
         EventHandler.current.onHoverOverTile -= UpdateHoveredTile;
+        EventHandler.current.onMoveAreaCalculated -= UpdateNeighboursAndHighlightArea;
+        EventHandler.current.onResourceDestroyed -= () => StartCoroutine(SysHelper.WaitForAndExecute(0.5f, () => UpdateNeighboursAndHighlightArea()));
     }
 
     // Update is called once per frame
@@ -44,49 +55,129 @@ public class SelectionManager : MonoBehaviour
     {
         if (isActive)
         {
+            // Right Click Deselect
+            if (Input.GetMouseButtonDown(1))
+            {
+                DeselectAll();
+            }
             if (Input.GetMouseButtonDown(0))
             {
                 var clickedObj = GetClickedObject();
-                if (clickedObj)
+                if (clickedObj && clickedObj.GetComponent<Selectable>())
                 {
-                    Debug.Log("Clicked on " + clickedObj.name);
-
-                    // Check if Hit Box collider clicked
-                    Selectable _selectable = clickedObj.gameObject.GetComponent<Selectable>();
-                    if (_selectable != null)
+                    // If nothing is selected, select the obj
+                    if (currentSelected.Count == 0)
                     {
-                        if (highlightArea.Count > 0)
-                        {
-                            if (highlightArea.Contains(hoveredTile))
-                            {
-                                currentSelected[0].GetComponent<Unit>().destTile = hoveredTile;
-                                currentSelected[0].GetComponent<Unit>().path = movePath;
-                            }
-                        }                        
-
-                        DeselectAll();
-                        Select(clickedObj.gameObject);                                                     
+                        Select(clickedObj);
                     }
-
-                    // If left clicked on not selectable / ground / other things
-                    // deselect everything
+                    // If a unit is selected
+                    if (currentSelected[0].GetComponent<Unit>())
+                    {
+                        if (clickedObj.GetComponent<Unit>() && currentSelected[0] != clickedObj)
+                        {
+                            DeselectAll();
+                            Select(clickedObj);
+                        }
+                        // Move?
+                        if (highlightArea.Count > 0 && highlightArea.Contains(hoveredTile) && !currentSelected[0].GetComponent<Unit>().destTile)
+                        {
+                            neighbours.Clear();
+                            var unit = currentSelected[0].GetComponent<Unit>();
+                            if (unit.remainingMoves > 0)
+                            {
+                                unit.destTile = hoveredTile;
+                                unit.path = movePath;
+                            }                            
+                        }
+                        // Action to neighbour tile?
+                        else if (neighbours.Contains(hoveredTile))
+                        {
+                            // Gather?
+                            if (hoveredTile.GetComponent<Resource>())
+                            {
+                                var unit = currentSelected[0].GetComponent<Unit>();
+                                ResourceManager.Gather(unit, hoveredTile.GetComponent<Resource>());
+                                //DeselectAll();
+                                //Select(unit.gameObject);
+                                //UpdateNeighboursAndHighlightArea();
+                                //unit.CalculateNewMoveArea(unit.currTile.index, unit.moveRange);
+                                    //SysHelper.WaitForAndExecute(1f, () => UpdateNeighboursAndHighlightArea(currentSelected[0].GetComponent<Unit>()));
+                            }
+                            // Feed Fire?
+                            else if (currentSelected[0].GetComponent<FeedFire>() && hoveredTile.tag == TagHandler.buildingBonfireString)
+                            {
+                                ResourceManager.FeedFire(1, PlayerResources.current.bonfire.transform.parent.GetComponent<Resource>());
+                            }
+                            else if (currentSelected[0].GetComponent<ConsumeFire>() && hoveredTile.tag == TagHandler.buildingBonfireString)
+                            {
+                                ResourceManager.ConsumeFirePower(1, PlayerResources.current.bonfire.transform.parent.GetComponent<Resource>(), currentSelected[0].GetComponent<Unit>());
+                            }
+                        }
+                    }
                     else
                     {
                         DeselectAll();
+                        Select(clickedObj);
                     }
-                }                    
+                }
+
             }
+
+
+            //if (Input.GetMouseButtonDown(0))
+            //{
+            //    var clickedObj = GetClickedObject();
+            //    if (clickedObj)
+            //    {
+            //        Debug.Log("Clicked on " + clickedObj.name);
+
+            //        Selectable _selectable = clickedObj.gameObject.GetComponent<Selectable>();
+            //        if (_selectable != null)
+            //        {
+            //            Select(clickedObj);
+            //            if (highlightArea.Count > 0)
+            //            {
+            //                if (highlightArea.Contains(hoveredTile))
+            //                {
+            //                    var unit = currentSelected[0].GetComponent<Unit>();
+            //                    if (unit.remainingMoves > 0)
+            //                    {
+            //                        unit.destTile = hoveredTile;
+            //                        unit.path = movePath;
+            //                    }
+            //                }
+            //            }         
+            //            if (neighbours.Contains(hoveredTile))
+            //            {
+            //                if (hoveredTile.GetComponent<Resource>())
+            //                    ResourceManager.Gather(currentSelected[0].GetComponent<Unit>(), hoveredTile.GetComponent<Resource>());       
+            //            }
+            //            else
+            //            {
+            //                DeselectAll();
+            //                Select(clickedObj.gameObject);
+            //            }
+            //        }
+
+            //        // If left clicked on not selectable / ground / other things
+            //        // deselect everything
+            //        else
+            //        {
+            //            DeselectAll();
+            //        }
+            //    }                    
+            //}
         }        
     }
 
-    private void UpdateHoveredTile(CubeIndex index)
+    private void UpdateHoveredTile(Tile tile)
     {
         if (hoveredTile)
         {
             SelectionStatusHandler vH = hoveredTile.GetComponent<SelectionStatusHandler>();
             vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
         }
-        hoveredTile = _grid.TileAt(index);
+        hoveredTile = tile;
         // This event gets picked up by the visual handlers of hovered tile and
         // sets its tile visibility
         
@@ -109,8 +200,8 @@ public class SelectionManager : MonoBehaviour
                 {
                     foreach (var item in movePath)
                     {
-                        Tile tile = _grid.TileAt(item);
-                        SelectionStatusHandler vH = tile.GetComponent<SelectionStatusHandler>();
+                        Tile _t = _grid.TileAt(item);
+                        SelectionStatusHandler vH = _t.GetComponent<SelectionStatusHandler>();
                         vH.ChangeSelectionStatus(Tile.SelectionStatus.Path);
                     }
                 }
@@ -134,10 +225,17 @@ public class SelectionManager : MonoBehaviour
     {
         _selectable = obj.GetComponent<Selectable>();
         _selectable.IsSelected = true;
+
+        // Add object to selection array if not selected yet
+        if (!currentSelected.Contains(obj))
+        {
+            currentSelected.Add(obj);
+        }
+
         if (obj.layer == 8) // Tile Layer 
         {
             Tile tile = obj.GetComponent<Tile>();
-            EventHandler.current.SelectTile(tile);
+            EventHandler.current.TileSelected(tile);
 
             SelectionStatusHandler vH = obj.GetComponent<SelectionStatusHandler>();
             vH.ChangeSelectionStatus(Tile.SelectionStatus.Selected);
@@ -151,25 +249,97 @@ public class SelectionManager : MonoBehaviour
             Unit unit = obj.GetComponent<Unit>();
             EventHandler.current.SelectUnit(unit);
 
+            // If the unit can gather resources add the neighbour tiles
+            // to the neighbour list
+            UpdateNeighboursAndHighlightArea();
+        }
+        Debug.Log("Selected " + obj.name);
+    }
+
+    public void UpdateNeighboursAndHighlightArea()
+    {
+        if (currentSelected.Count > 0)
+        {
+            Unit unit = null;
+            if (currentSelected[0].GetComponent<Unit>())
+                unit = currentSelected[0].GetComponent<Unit>();
+
+            GetNeighbours(unit);
+
+            foreach (var item in highlightArea)
+            {
+                SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
+                vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
+            }
             highlightArea = unit.GetMoveAreaTilesByIndices();
             foreach (var item in highlightArea)
             {
                 SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
                 vH.ChangeSelectionStatus(Tile.SelectionStatus.Highlighted);
             }
+            Debug.Log("Updated Neighbours and Highlight Area");
         }
-        // Add object to selection array if not selected yet
-        if (!currentSelected.Contains(obj))
+
+
+    }
+
+    private void GetNeighbours(Unit unit)
+    {
+        neighbours.Clear();
+        var allNeighbours = _grid.Neighbours(unit.currTile);
+
+        if (unit.GetComponent<GatherResource>() != null)
         {
-            currentSelected.Add(obj);
-        }        
-        Debug.Log("Selected " + obj.name);
+            foreach (var neighbour in allNeighbours)
+            {
+                if (neighbour.GetComponent<Resource>() && !neighbours.Contains(neighbour))
+                {
+                    neighbours.Add(neighbour);
+                }
+            }
+        }
+        if (unit.GetComponent<FeedFire>() != null)
+        {
+            foreach (var neighbour in allNeighbours)
+            {
+                if (neighbour.tag == TagHandler.buildingBonfireString && !neighbours.Contains(neighbour))
+                {
+                    neighbours.Add(neighbour);
+                }
+            }
+        }
+        if (unit.GetComponent<ConsumeFire>() != null)
+        {
+            foreach (var neighbour in allNeighbours)
+            {
+                if (neighbour.tag == TagHandler.buildingBonfireString && !neighbours.Contains(neighbour))
+                {
+                    neighbours.Add(neighbour);
+                }
+            }
+        }
+        if (unit.GetComponent<CookSoup>() != null)
+        {
+            foreach (var neighbour in allNeighbours)
+            {
+                if (neighbour.tag == TagHandler.buildingCauldronString && !neighbours.Contains(neighbour))
+                {
+                    neighbours.Add(neighbour);
+                }
+            }
+        }
     }
 
     private void DeselectAll()
     {
         EventHandler.current.DeselectAll();
+        ResetSelection();
+        ResetHighLightArea();
+        neighbours.Clear();
+    }
 
+    private void ResetSelection()
+    {
         if (currentSelected.Count > 0)
         {
             foreach (GameObject obj in currentSelected)
@@ -180,21 +350,21 @@ public class SelectionManager : MonoBehaviour
                 {
                     SelectionStatusHandler vH = obj.GetComponent<SelectionStatusHandler>();
                     vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
-                }                
+                }
             }
             Debug.Log("Deselected all current selected objects");
         }
         currentSelected.Clear();
+    }
+
+    private void ResetHighLightArea()
+    {
         if (highlightArea.Count > 0)
         {
-            foreach(var item in highlightArea)
+            foreach (var item in highlightArea)
             {
-                SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();                
+                SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
                 vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
-                //else
-                //{
-                //    vH.ChangeVisibility(Tile.Visibility.Hidden);
-                //}
             }
         }
         highlightArea.Clear();
@@ -215,7 +385,7 @@ public class SelectionManager : MonoBehaviour
         return clickedObj;
     }
 
-    public Vector3 GetMousePos()
+    public static Vector3 GetMousePos()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;

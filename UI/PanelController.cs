@@ -7,6 +7,7 @@ public class PanelController : MonoBehaviour
 {
     private GameObject unitPanelPrefab;
     private GameObject tilePanelPrefab;
+    private GameObject mouseHoverPanelPrefab;
 
 
     // Runtime instantiated panels
@@ -14,17 +15,29 @@ public class PanelController : MonoBehaviour
     private GameObject unitPanel;
     [SerializeField]
     private GameObject tilePanel;
+    [SerializeField]
+    GameObject mouseHoverPanel;
+
     void Start()
     {
         unitPanelPrefab = (GameObject)Resources.Load("UI/UnitPanel");
         tilePanelPrefab = (GameObject)Resources.Load("UI/TilePanel");
+        mouseHoverPanelPrefab = (GameObject)Resources.Load("UI/MouseHoverPanel");
 
-        EventHandler.current.onUnitSelected += CreateUnitPanel;
-        EventHandler.current.onTileSelected += CreateTilePanel;
-
+        EventHandler.current.onFireConsumed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
+        EventHandler.current.onFireFed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
+        EventHandler.current.onHoverOverTile += CreateMouseHoverPanel;
+        EventHandler.current.onTileSelected += CreateMouseHoverPanel;
         EventHandler.current.onDeselectedAll += DestroyAllPanels;
     }
-
+    private void OnDestroy()
+    {
+        EventHandler.current.onFireConsumed -= () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
+        EventHandler.current.onFireFed -= () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
+        EventHandler.current.onHoverOverTile -= CreateMouseHoverPanel;
+        EventHandler.current.onTileSelected -= CreateMouseHoverPanel;
+        EventHandler.current.onDeselectedAll -= DestroyAllPanels;
+    }
     private void DestroyAllPanels()
     {
         if (unitPanel)
@@ -35,12 +48,35 @@ public class PanelController : MonoBehaviour
         {
             GameObject.Destroy(tilePanel);
         }
+        if (mouseHoverPanel)
+        {
+            GameObject.Destroy(mouseHoverPanel);
+        }
+    }
+
+    private void CreateMouseHoverPanel(Tile tile)
+    {
+        if (mouseHoverPanel)
+        {
+            GameObject.Destroy(mouseHoverPanel);
+        }
+
+        var panelPos = new Vector3(tile.transform.position.x, 4, tile.transform.position.z);
+        this.transform.position = panelPos;
+        mouseHoverPanel = Instantiate(mouseHoverPanelPrefab, panelPos, Camera.main.transform.rotation, GameObject.Find("UI_WorldSpaceCanvas").transform);
+        var mouseHoverAddInfo = mouseHoverPanel.transform.Find("mouseHoverAddInfo").gameObject;
+        
+        if (tile.tag != TagHandler.buildingWoodStorageString && tile.tag != TagHandler.buildingBonfireString)
+            mouseHoverAddInfo.SetActive(false);
+
+        mouseHoverPanel.GetComponent<MouseHoverPanel>().UpdatePanelText(tile);
+
     }
 
     private void CreateUnitPanel(Unit unit)
     {
         unitPanel = Instantiate(unitPanelPrefab, this.transform);
-        unitPanel.GetComponent<UnitPanel>().UpdatePanel(unit);
+        unitPanel.GetComponent<UnitPanel>().UpdatePanel(unit, ResourceManager.ResourceType.Wood);
     }
 
     private void CreateTilePanel(Tile tile)
@@ -50,11 +86,5 @@ public class PanelController : MonoBehaviour
     }
 
 
-    private void OnDestroy()
-    {
-        EventHandler.current.onUnitSelected -= CreateUnitPanel;
-        EventHandler.current.onTileSelected -= CreateTilePanel;
 
-        EventHandler.current.onDeselectedAll -= DestroyAllPanels;
-    }
 }

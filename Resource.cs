@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using JetBrains.Annotations;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,9 +11,25 @@ using UnityEngine;
 public class Resource : MonoBehaviour
 {
     public ResourceManager.ResourceType type;
-    public int amount;
+
+    [SerializeField]
+    private int amount;  
+    public int Amount
+    {
+        get { return amount; }
+        set { amount = value; }
+    }
 
     private int workCost;
+    public int WorkCost
+    {
+        get { return workCost; }
+        set { workCost = value; }
+    }
+
+    public List<GameObject> resourceObjects = new List<GameObject>();
+
+    private Tile _tile;
 
     Resource (ResourceManager.ResourceType type, int amount, int workCost)
     {
@@ -21,6 +38,7 @@ public class Resource : MonoBehaviour
         this.type = type;
         this.amount = amount;
         this.workCost = workCost;
+        
     }
 
     Resource (ResourceManager.ResourceType type, int amount)
@@ -30,9 +48,19 @@ public class Resource : MonoBehaviour
         this.amount = amount;
     }
 
-    public int WorkCost
+    private void OnEnable()
     {
-        get { return workCost; }
-        set { workCost = value; }
+        resourceObjects = new List<GameObject>();
+        _tile = GetComponent<Tile>();
+    }
+
+    private void OnDestroy()
+    {
+        if (this.tag != TagHandler.buildingBonfireString)
+        {
+            _tile.Passable = true;
+            this.tag = TagHandler.walkGroundString;
+            EventHandler.current.ResourceDestroyed();
+        }        
     }
 }
