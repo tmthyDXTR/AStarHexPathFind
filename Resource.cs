@@ -30,7 +30,7 @@ public class Resource : MonoBehaviour
     public List<GameObject> resourceObjects = new List<GameObject>();
 
     private Tile _tile;
-
+    private Map _mapGen;
     Resource (ResourceManager.ResourceType type, int amount, int workCost)
     {
         // This constructor is used for the creation of resource tiles
@@ -52,14 +52,14 @@ public class Resource : MonoBehaviour
     {
         resourceObjects = new List<GameObject>();
         _tile = GetComponent<Tile>();
+        _mapGen = GameObject.Find("MapGen").GetComponent<Map>();
     }
 
     private void OnDestroy()
     {
         if (this.tag != TagHandler.buildingBonfireString)
         {
-            _tile.Passable = true;
-            this.tag = TagHandler.walkGroundString;
+            _mapGen.SetTilePropTo(this.transform, Tile.Property.Grass);
             EventHandler.current.ResourceDestroyed();
         }        
     }

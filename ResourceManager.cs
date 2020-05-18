@@ -206,6 +206,17 @@ public class ResourceManager : MonoBehaviour
                         Destroy(resource);
                     }
                 }
+                else if (resource.type == ResourceManager.ResourceType.Stone)
+                {
+                    var resourceObjToReplace = resource.resourceObjects[0];
+                    //GameObject stump = Instantiate((GameObject)Resources.Load("Nature/Stump"), resourceObjToReplace.transform.position, resourceObjToReplace.transform.rotation, resource.transform);
+                    //resource.resourceObjects.Remove(resourceObjToReplace);
+                    if (resource.Amount < 1) 
+                    {
+                        Destroy(resourceObjToReplace);
+                        Destroy(resource);
+                    }
+                }
             }
             else
             {

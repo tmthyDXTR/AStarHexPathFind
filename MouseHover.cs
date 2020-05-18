@@ -8,12 +8,29 @@ using UnityEngine;
 /// </summary>
 public class MouseHover : MonoBehaviour
 {
+    SelectionManager _selection;
+    private void Start()
+    {
+        _selection = GameObject.Find("SelectionManager").GetComponent<SelectionManager>();
+    }
     private void OnMouseEnter()
     {
-        if (gameObject.layer == 8) // Tile Layer 
+        if (_selection.IsActive)
         {
-            Tile tile = GetComponent<Tile>();
-            EventHandler.current.HoverOverTile(tile);
-        }
+            if (gameObject.layer == 8) // Tile Layer 
+            {
+                Tile tile = GetComponent<Tile>();
+                if (tile.selectionStatus != Tile.SelectionStatus.Fog)
+                    EventHandler.current.HoverOverTile(tile);
+                else
+                    EventHandler.current.HoverOverDarkness(tile);
+            }
+            else if (gameObject.layer == 22) // Darkness Layer 
+            {
+                Tile tile = gameObject.transform.parent.GetComponent<Tile>();
+                Debug.Log("Darkness");
+                EventHandler.current.HoverOverDarkness(tile);
+            }
+        }       
     }
 }

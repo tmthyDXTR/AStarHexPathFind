@@ -8,10 +8,13 @@ public class Tile : MonoBehaviour {
 		Default,
 		Grass,
 		Tree,
-		Rock,
+		Stone,
 		Bonfire,
 		WoodStorage,
+		StoneStorage,
 		Cauldron,
+		House,
+		Construction,
 	}
 	public Property property;
 
@@ -22,6 +25,7 @@ public class Tile : MonoBehaviour {
 		Highlighted,
 		Selected,
 		Path,
+		Fog,
 	}
 	public SelectionStatus selectionStatus;	
 
@@ -46,7 +50,17 @@ public class Tile : MonoBehaviour {
 			isDark = value;
 		}
 	}
-
+	[SerializeField]
+	private bool isDiscoveredFog = false;
+	public bool IsDiscoveredFog
+	{
+		get { return isDiscoveredFog; } 
+		set
+		{
+			isDiscoveredFog = value;
+			// if tru
+		}
+	}
 
 	public static Vector3 Corner(Vector3 origin, float radius, int corner, HexOrientation orientation){
 		float angle = 60 * corner;

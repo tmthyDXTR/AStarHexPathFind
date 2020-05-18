@@ -8,6 +8,7 @@ public class PanelController : MonoBehaviour
     private GameObject unitPanelPrefab;
     private GameObject tilePanelPrefab;
     private GameObject mouseHoverPanelPrefab;
+    private GameObject buildingTabPrefab;
 
 
     // Runtime instantiated panels
@@ -17,26 +18,39 @@ public class PanelController : MonoBehaviour
     private GameObject tilePanel;
     [SerializeField]
     GameObject mouseHoverPanel;
-
+    [SerializeField]
+    GameObject buildingTab;
     void Start()
     {
         unitPanelPrefab = (GameObject)Resources.Load("UI/UnitPanel");
         tilePanelPrefab = (GameObject)Resources.Load("UI/TilePanel");
         mouseHoverPanelPrefab = (GameObject)Resources.Load("UI/MouseHoverPanel");
+        buildingTabPrefab = (GameObject)Resources.Load("UI/BuildingTab");
 
         EventHandler.current.onFireConsumed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
         EventHandler.current.onFireFed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
         EventHandler.current.onHoverOverTile += CreateMouseHoverPanel;
-        EventHandler.current.onTileSelected += CreateMouseHoverPanel;
+        //EventHandler.current.onTileSelected += CreateMouseHoverPanel;
         EventHandler.current.onDeselectedAll += DestroyAllPanels;
+        EventHandler.current.onResourceDestroyed -= () => SysHelper.WaitForAndExecute(0.5f, () => CreateMouseHoverPanel(SelectionManager.hoveredTile));
+        EventHandler.current.onHoverOverDarkness += CreateMouseHoverPanel;
+
+        EventHandler.current.onOpenedBuildingTab += CreateBuildingTab;
+        EventHandler.current.onSelectedBuildingToBuild += DestroyAllPanels;
     }
     private void OnDestroy()
     {
         EventHandler.current.onFireConsumed -= () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
         EventHandler.current.onFireFed -= () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
         EventHandler.current.onHoverOverTile -= CreateMouseHoverPanel;
-        EventHandler.current.onTileSelected -= CreateMouseHoverPanel;
+        //EventHandler.current.onTileSelected -= CreateMouseHoverPanel;
+        EventHandler.current.onResourceDestroyed -= () => SysHelper.WaitForAndExecute(0.5f, () => CreateMouseHoverPanel(SelectionManager.hoveredTile));
         EventHandler.current.onDeselectedAll -= DestroyAllPanels;
+        EventHandler.current.onHoverOverDarkness -= CreateMouseHoverPanel;
+
+        EventHandler.current.onOpenedBuildingTab -= CreateBuildingTab;
+        EventHandler.current.onSelectedBuildingToBuild -= DestroyAllPanels;
+
     }
     private void DestroyAllPanels()
     {
@@ -52,6 +66,19 @@ public class PanelController : MonoBehaviour
         {
             GameObject.Destroy(mouseHoverPanel);
         }
+        if (buildingTab)
+        {
+            GameObject.Destroy(buildingTab);
+        }
+    }
+
+    private void CreateBuildingTab()
+    {
+        DestroyAllPanels();
+
+        var panelPos = new Vector3(SelectionManager.hoveredTile.transform.position.x, 4.25f, SelectionManager.hoveredTile.transform.position.z);
+        buildingTab = Instantiate(buildingTabPrefab, panelPos, Camera.main.transform.rotation, GameObject.Find("UI_WorldSpaceCanvas").transform);
+        buildingTab.GetComponent<BuildingTab>().UpdateBuildingTab();
     }
 
     private void CreateMouseHoverPanel(Tile tile)
@@ -61,12 +88,12 @@ public class PanelController : MonoBehaviour
             GameObject.Destroy(mouseHoverPanel);
         }
 
-        var panelPos = new Vector3(tile.transform.position.x, 4, tile.transform.position.z);
-        this.transform.position = panelPos;
+        var panelPos = new Vector3(tile.transform.position.x, 6.25f, tile.transform.position.z);
+        //this.transform.position = panelPos;
         mouseHoverPanel = Instantiate(mouseHoverPanelPrefab, panelPos, Camera.main.transform.rotation, GameObject.Find("UI_WorldSpaceCanvas").transform);
         var mouseHoverAddInfo = mouseHoverPanel.transform.Find("mouseHoverAddInfo").gameObject;
         
-        if (tile.tag != TagHandler.buildingWoodStorageString && tile.tag != TagHandler.buildingBonfireString)
+        if (tile.tag != TagHandler.buildingWoodStorageString && tile.tag != TagHandler.buildingBonfireString && tile.tag != TagHandler.buildingStoneStorageString)
             mouseHoverAddInfo.SetActive(false);
 
         mouseHoverPanel.GetComponent<MouseHoverPanel>().UpdatePanelText(tile);

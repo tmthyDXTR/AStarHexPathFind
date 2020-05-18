@@ -26,7 +26,7 @@ public class MouseHoverPanel : MonoBehaviour
             {
                 Resource resource = tile.GetComponent<Resource>();
                 hoverPanel.text = "Gather " + resource.type.ToString();
-            }
+            }           
             else if (_selection.currentSelected[0].GetComponent<ConsumeFire>() && tile.tag == TagHandler.buildingBonfireString)
             {
                 hoverPanel.text = "Consume Fire Power";
@@ -45,7 +45,6 @@ public class MouseHoverPanel : MonoBehaviour
                 hoverPanel.text = "Start a Brew";
                 var hoverAddInfoPanelText = this.transform.Find("mouseHoverAddInfo").GetChild(0).gameObject;
                 hoverAddInfoPanelText.GetComponent<TextMeshProUGUI>().text = $"Yummy soup...";
-
             }
         }
         else if (tile.unit != null)
@@ -58,11 +57,25 @@ public class MouseHoverPanel : MonoBehaviour
             var hoverAddInfoPanelText = this.transform.Find("mouseHoverAddInfo").GetChild(0).gameObject;
             hoverAddInfoPanelText.GetComponent<TextMeshProUGUI>().text = $"{PlayerResources.Wood}/{PlayerResources.woodMax}";
         }
+        else if (tile.tag == TagHandler.buildingStoneStorageString)
+        {
+            hoverPanel.text = tile.property.ToString();
+            var hoverAddInfoPanelText = this.transform.Find("mouseHoverAddInfo").GetChild(0).gameObject;
+            hoverAddInfoPanelText.GetComponent<TextMeshProUGUI>().text = $"{PlayerResources.Stone}/{PlayerResources.stoneMax}";
+        }
         else if (tile.tag == TagHandler.buildingBonfireString)
         {
             hoverPanel.text = tile.property.ToString();
             var hoverAddInfoPanelText = this.transform.Find("mouseHoverAddInfo").GetChild(0).gameObject;
             hoverAddInfoPanelText.GetComponent<TextMeshProUGUI>().text = $"{PlayerResources.Fire}/10";
+        }
+        else if (tile.IsDark && !tile.IsDiscoveredFog)
+        {
+            hoverPanel.text = "The Darkness";
+        }
+        else if (tile.IsDiscoveredFog)
+        {
+            hoverPanel.text = "Creeping Blackness";
         }
         else
         {

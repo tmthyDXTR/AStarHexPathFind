@@ -16,7 +16,9 @@ public class Map : MonoBehaviour
     public GameObject rockPrefab;
     public GameObject bonfirePrefab;
     public GameObject woodStoragePrefab;
+    public GameObject stoneStoragePrefab;
     public GameObject cauldronPrefab;
+    public GameObject housePrefab;
 
     public Grid _grid;
     void Start()
@@ -137,7 +139,7 @@ public class Map : MonoBehaviour
             tile.Passable = true;
             tile.tag = TagHandler.walkGroundString;
         }
-        if (newProperty == Tile.Property.Rock)
+        if (newProperty == Tile.Property.Stone)
         {
             meshRen.material = (rockMaterial) ? rockMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
             SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
@@ -158,6 +160,17 @@ public class Map : MonoBehaviour
             GameObject woodStorage = Instantiate(Resources.Load("Buildings/" + woodStoragePrefab.name), tileTransform.position, Quaternion.Euler(0, 120, 0), tileTransform) as GameObject;
             woodStorage.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             woodStorage.name = woodStoragePrefab.name;
+            tile.Passable = false;
+        }
+        if (newProperty == Tile.Property.StoneStorage)
+        {
+            meshRen.material = (rockMaterial) ? rockMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+            SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
+            tileMat.originalMat = meshRen.material;
+            tile.tag = TagHandler.buildingStoneStorageString;
+            GameObject woodStorage = Instantiate(Resources.Load("Buildings/" + stoneStoragePrefab.name), tileTransform.position, Quaternion.Euler(0, 120, 0), tileTransform) as GameObject;
+            woodStorage.name = stoneStoragePrefab.name;
+            tile.Passable = false;
         }
         if (newProperty == Tile.Property.Cauldron)
         {
@@ -169,8 +182,24 @@ public class Map : MonoBehaviour
             tile.Passable = false;
             cauldron.name = woodStoragePrefab.name;
         }
-
-
+        if (newProperty == Tile.Property.House)
+        {
+            meshRen.material = (dirtMaterial) ? dirtMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+            SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
+            tileMat.originalMat = meshRen.material;
+            tile.tag = TagHandler.buildingHouseString;
+            GameObject house = Instantiate(Resources.Load("Buildings/" + housePrefab.name), tileTransform.position, Quaternion.identity, tileTransform) as GameObject;
+            house.name = housePrefab.name;
+            tile.Passable = false;
+        }
+        if (newProperty == Tile.Property.Construction)
+        {
+            meshRen.material = (dirtMaterial) ? dirtMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+            SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
+            tileMat.originalMat = meshRen.material;
+            tile.Passable = true;
+            tile.tag = TagHandler.buildingConstructionString;
+        }
 
         if (newProperty == Tile.Property.Default)
         {

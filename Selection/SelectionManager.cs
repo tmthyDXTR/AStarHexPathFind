@@ -17,6 +17,22 @@ public class SelectionManager : MonoBehaviour
     #region Variables
     [SerializeField]
     public bool isActive = true;
+    public bool IsActive
+    {        
+        get { return isActive; }
+        set
+        {
+            isActive = value;
+            if (value)
+            {
+                Debug.Log("SelectionManager set active.");
+            }
+            else
+            {
+                Debug.Log("SelectionManager set inactive.");
+            }
+        }
+    }
     [SerializeField]
     public static Tile hoveredTile;
 
@@ -53,22 +69,31 @@ public class SelectionManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isActive)
+        // Right Click Deselect
+        if (Input.GetMouseButtonDown(1))
         {
-            // Right Click Deselect
-            if (Input.GetMouseButtonDown(1))
-            {
-                DeselectAll();
-            }
+            DeselectAll();
+        }
+        if (IsActive)
+        {            
             if (Input.GetMouseButtonDown(0))
             {
                 var clickedObj = GetClickedObject();
-                if (clickedObj && clickedObj.GetComponent<Selectable>())
+                if (clickedObj.GetComponent<Tile>() && clickedObj.GetComponent<Tile>().IsDiscoveredFog)
+                {
+                    Debug.Log("Clicked creeping darkness");
+                }
+                else if (clickedObj && clickedObj.GetComponent<Selectable>())
                 {
                     // If nothing is selected, select the obj
                     if (currentSelected.Count == 0)
                     {
                         Select(clickedObj);
+                    }
+                    // Start a build?
+                    if (clickedObj.tag == TagHandler.walkGroundString && clickedObj.GetComponent<Tile>() && !currentSelected[0].GetComponent<Unit>())
+                    {
+                        EventHandler.current.OpenBuildingTab();
                     }
                     // If a unit is selected
                     if (currentSelected[0].GetComponent<Unit>())
@@ -113,60 +138,16 @@ public class SelectionManager : MonoBehaviour
                                 ResourceManager.ConsumeFirePower(1, PlayerResources.current.bonfire.transform.parent.GetComponent<Resource>(), currentSelected[0].GetComponent<Unit>());
                             }
                         }
-                    }
-                    else
-                    {
-                        DeselectAll();
-                        Select(clickedObj);
-                    }
+
+                    }  
+                    //else
+                    //{
+                    //    DeselectAll();
+                    //    Select(clickedObj);
+                    //}
                 }
 
             }
-
-
-            //if (Input.GetMouseButtonDown(0))
-            //{
-            //    var clickedObj = GetClickedObject();
-            //    if (clickedObj)
-            //    {
-            //        Debug.Log("Clicked on " + clickedObj.name);
-
-            //        Selectable _selectable = clickedObj.gameObject.GetComponent<Selectable>();
-            //        if (_selectable != null)
-            //        {
-            //            Select(clickedObj);
-            //            if (highlightArea.Count > 0)
-            //            {
-            //                if (highlightArea.Contains(hoveredTile))
-            //                {
-            //                    var unit = currentSelected[0].GetComponent<Unit>();
-            //                    if (unit.remainingMoves > 0)
-            //                    {
-            //                        unit.destTile = hoveredTile;
-            //                        unit.path = movePath;
-            //                    }
-            //                }
-            //            }         
-            //            if (neighbours.Contains(hoveredTile))
-            //            {
-            //                if (hoveredTile.GetComponent<Resource>())
-            //                    ResourceManager.Gather(currentSelected[0].GetComponent<Unit>(), hoveredTile.GetComponent<Resource>());       
-            //            }
-            //            else
-            //            {
-            //                DeselectAll();
-            //                Select(clickedObj.gameObject);
-            //            }
-            //        }
-
-            //        // If left clicked on not selectable / ground / other things
-            //        // deselect everything
-            //        else
-            //        {
-            //            DeselectAll();
-            //        }
-            //    }                    
-            //}
         }        
     }
 
@@ -213,8 +194,8 @@ public class SelectionManager : MonoBehaviour
 
     public void SetSelectManagerActive(bool value)
     {
-        isActive = value;
-        if (isActive)
+        IsActive = value;
+        if (IsActive)
             Debug.Log("Selection Manager activated");
         else
             Debug.Log("Selection Manager deactivated");
@@ -269,7 +250,14 @@ public class SelectionManager : MonoBehaviour
             foreach (var item in highlightArea)
             {
                 SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
-                vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
+                if (item.IsDiscoveredFog)
+                {
+                    vH.ChangeSelectionStatus(Tile.SelectionStatus.Fog);
+                }
+                else
+                {
+                    vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
+                }
             }
             highlightArea = unit.GetMoveAreaTilesByIndices();
             foreach (var item in highlightArea)
@@ -330,7 +318,7 @@ public class SelectionManager : MonoBehaviour
         }
     }
 
-    private void DeselectAll()
+    public void DeselectAll()
     {
         EventHandler.current.DeselectAll();
         ResetSelection();

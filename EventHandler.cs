@@ -14,6 +14,25 @@ public class EventHandler : MonoBehaviour
 
 
     // Events
+    public event Action onSelectedBuildingToBuild;
+    public void SelectBuildingToBuild()
+    {
+        if (onSelectedBuildingToBuild != null)
+        {
+            onSelectedBuildingToBuild();
+        }
+    }
+
+
+    public event Action onOpenedBuildingTab;
+    public void OpenBuildingTab()
+    {
+        if (onOpenedBuildingTab != null)
+        {
+            onOpenedBuildingTab(); 
+        }
+    }
+
     public event Action onFireConsumed;
     public void ConsumeFire()
     {
@@ -102,6 +121,14 @@ public class EventHandler : MonoBehaviour
         if (onHoverOverTile != null)
         {
             onHoverOverTile(tile);
+        }
+    }
+    public event Action<Tile> onHoverOverDarkness;
+    public void HoverOverDarkness(Tile tile)
+    {
+        if (onHoverOverDarkness != null)
+        {
+            onHoverOverDarkness(tile);
         }
     }
 

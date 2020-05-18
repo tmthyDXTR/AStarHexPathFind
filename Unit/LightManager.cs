@@ -31,11 +31,15 @@ public class LightManager : MonoBehaviour
             {
                 item.Key.IsDark = false;
                 vH.darkness.SetActive(false);
+                vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
+                item.Key.IsDiscoveredFog = false;
             }
             if (item.Value < 1)
             {
-                item.Key.IsDark = true;
-                vH.darkness.SetActive(true);
+                item.Key.IsDiscoveredFog = true;
+                //item.Key.IsDark = true;
+                //vH.darkness.SetActive(true);
+                vH.ChangeSelectionStatus(Tile.SelectionStatus.Fog);
             }
         }
         var toRemove = litTiles.Where(x => x.Value == 0).Select(x => x.Key).ToList();

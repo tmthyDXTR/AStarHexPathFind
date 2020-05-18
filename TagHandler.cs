@@ -18,7 +18,9 @@ public static class TagHandler
 
     // Buildings
     public static readonly string buildingBonfireString = "BuildingBonfire";
+    public static readonly string buildingConstructionString = "BuildingConstruction";
     public static readonly string buildingWoodStorageString = "BuildingWoodStorage";
     public static readonly string buildingStoneStorageString = "BuildingStoneStorage";
     public static readonly string buildingCauldronString = "BuildingCauldron";
+    public static readonly string buildingHouseString = "BuildingHouse";
 }
