@@ -16,14 +16,15 @@ public class BuildingTab : MonoBehaviour
 
     private void OnEnable()
     {
-        _selection = GameObject.Find("SelectionManager").GetComponent<SelectionManager>();
-        _selection.IsActive = false;
+        _selection = GameObject.Find("SelectionManager").GetComponent<SelectionManager>();        
         _buildingManager = GameObject.Find("BuildingManager").GetComponent<BuildingManager>();
         buttonPrefab = (GameObject)Resources.Load("UI/Button");
+        EventHandler.current.HoverOverUIStart();
     }
 
     public void UpdateBuildingTab()
     {
+        // Create a Button for every building in the building manager list
         foreach (var buildingEntry in _buildingManager.buildings)
         {
             var buttonObj = Instantiate(buttonPrefab, this.transform);
@@ -38,8 +39,10 @@ public class BuildingTab : MonoBehaviour
         Debug.Log("Building tab updated");
     }
 
+
+
     private void OnDestroy()
     {
-        _selection.IsActive = true;
+        EventHandler.current.HoverOverUIEnd();
     }
 }

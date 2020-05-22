@@ -33,7 +33,7 @@ public class TilePanel : MonoBehaviour
             if(selectedTile.GetComponent<Resource>())
             {
                 tileResourceAmount.text = $"Amount: {tile.GetComponent<Resource>().Amount}";
-                tileResourceWorkCost.text = $"WorkCost: {tile.GetComponent<Resource>().WorkCost}";
+                tileResourceWorkCost.text = $"WorkCost: {tile.GetComponent<Resource>().CostWork}";
             }                
             Debug.Log("Updated Tile panel");
         }

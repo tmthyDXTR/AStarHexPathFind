@@ -19,25 +19,25 @@ public class Resource : MonoBehaviour
         get { return amount; }
         set { amount = value; }
     }
-
-    private int workCost;
-    public int WorkCost
+    [SerializeField]
+    private int costWork;
+    public int CostWork
     {
-        get { return workCost; }
-        set { workCost = value; }
+        get { return costWork; }
+        set { costWork = value; }
     }
 
     public List<GameObject> resourceObjects = new List<GameObject>();
 
     private Tile _tile;
     private Map _mapGen;
-    Resource (ResourceManager.ResourceType type, int amount, int workCost)
+    Resource (ResourceManager.ResourceType type, int amount, int costWork)
     {
         // This constructor is used for the creation of resource tiles
         // and also defines the work cost to harvest
         this.type = type;
         this.amount = amount;
-        this.workCost = workCost;
+        this.costWork = costWork;
         
     }
 

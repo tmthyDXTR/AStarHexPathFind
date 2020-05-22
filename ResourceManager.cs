@@ -36,6 +36,7 @@ public class ResourceManager : MonoBehaviour
 
 
 
+
     public static void AddRemoveResource(ResourceType type, int amount, MethodHandler.Command addRemove)
     {
         var player = GameObject.Find("ResourceManager").GetComponent<PlayerResources>();
@@ -166,7 +167,17 @@ public class ResourceManager : MonoBehaviour
             Debug.Log("Can't consume anymore fire power.");
         }
     }
-    
+
+    public static void EndBurn(int amount)
+    {
+        
+        Bonfire bonfire = GameObject.Find("Bonfire").GetComponent<Bonfire>();
+        bonfire._resource.Amount -= amount;
+        ResourceManager.AddRemoveResource(ResourceManager.ResourceType.Fire, 1, MethodHandler.Command.Remove);
+        bonfire.UpdateBonfireLevel();
+        EventHandler.current.ConsumeFire();
+    }
+
     public static void FeedFire(int amount, Resource resource)
     {
         if ((resource.Amount + amount) <= 10 && PlayerResources.Wood >= amount)
@@ -187,27 +198,103 @@ public class ResourceManager : MonoBehaviour
     {
         if (PlayerResources.hasStorageRoom(resource.type, 1))
         {
-            if (worker.remainingMoves >= resource.WorkCost)
+            if (worker.remainingMoves >= resource.CostWork)
             {
-                worker.remainingMoves -= resource.WorkCost;
+                worker.remainingMoves -= resource.CostWork;
                 resource.Amount--;
-                EventHandler.current.ResourceGathered(worker, resource.type);
-                AddRemoveResource(resource.type, 1, MethodHandler.Command.Add);
-                Debug.Log("Gathered: " + resource.type);
+                
 
                 if (resource.type == ResourceManager.ResourceType.Wood)
                 {
                     var resourceObjToReplace = resource.resourceObjects[0];
-                    GameObject stump = Instantiate((GameObject)Resources.Load("Nature/Stump"), resourceObjToReplace.transform.position, resourceObjToReplace.transform.rotation, resource.transform);
-                    resource.resourceObjects.Remove(resourceObjToReplace);
-                    Destroy(resourceObjToReplace);
-                    if (resource.resourceObjects.Count == 0)
+                    // OldTree
+                    if (resourceObjToReplace.transform.parent.tag == TagHandler.magicTreeString)
                     {
-                        Destroy(resource);
+                        OldTree oldTree = resource.resourceObjects[0].GetComponent<OldTree>();
+                        var sun = GameObject.Find("Sun").GetComponent<LightSource>();
+                        if (resource.Amount == 9)
+                        {
+                            Talker.TypeThis("Kablang..."); 
+                            sun.LightRange--;
+                            oldTree.minimum = -0.8f;
+                            
+                        }
+                        if (resource.Amount == 8)
+                        {
+                            Talker.TypeThis("Mortal, you are way out of line!");
+                            sun.LightRange--;
+                            oldTree.minimum = -0.6f;
+
+                        }
+                        if (resource.Amount == 7)
+                        {
+                            Talker.TypeThis("Hold on for a second, I must warn you!");
+                            sun.LightRange--;
+                            oldTree.minimum = -0.4f;
+
+                        }
+                        if (resource.Amount == 6)
+                        {
+                            Talker.TypeThis("Felling this tree will lead down a path of darkness...");
+                            sun.LightRange--;
+                            oldTree.minimum = -0.2f;
+
+                        }
+                        if (resource.Amount == 5)
+                        {
+                            Talker.TypeThis("The last person that tried to cut me down somehow seemed more sensible than you.");
+                        }if (resource.Amount < 5 && resource.Amount > 0)
+                        {
+                            AddRemoveResource(resource.type, 1, MethodHandler.Command.Add);
+                            EventHandler.current.ResourceGathered(worker, resource.type);
+                            Debug.Log("Gathered: " + resource.type);
+                            Talker.TypeThis("Gathered: " + resource.type);
+                            sun.LightRange--;
+                            oldTree.minimum =+ 0.2f;
+
+                        }
+                        if (resource.Amount == 0)
+                        {
+                            AddRemoveResource(resource.type, 1, MethodHandler.Command.Add);
+                            EventHandler.current.ResourceGathered(worker, resource.type);
+                            Debug.Log("Gathered: " + resource.type);
+                            Talker.TypeThis("Gathered: " + resource.type);
+                            resource.resourceObjects.Remove(resourceObjToReplace);
+                            Destroy(resourceObjToReplace);
+                            if (resource.resourceObjects.Count == 0)
+                            {
+                                Destroy(resource);
+                            }
+
+                            sun.LightRange = 0;
+                            GameObject.Destroy(sun.gameObject);
+                            GameObject stump = Instantiate((GameObject)Resources.Load("Nature/OldTreeDark"), resourceObjToReplace.transform.position, resourceObjToReplace.transform.rotation, resource.transform);
+
+                        }
                     }
+                    else
+                    {
+                        AddRemoveResource(resource.type, 1, MethodHandler.Command.Add);
+                        EventHandler.current.ResourceGathered(worker, resource.type);
+                        Debug.Log("Gathered: " + resource.type);
+                        Talker.TypeThis("Gathered: " + resource.type);
+                        GameObject stump = Instantiate((GameObject)Resources.Load("Nature/Stump"), resourceObjToReplace.transform.position, resourceObjToReplace.transform.rotation, resource.transform);
+                        GameObject treeFall = Instantiate((GameObject)Resources.Load("Nature/TreeFall"), resourceObjToReplace.transform.position, resourceObjToReplace.transform.rotation, resource.transform);
+                        treeFall.transform.localScale += new Vector3(1, 1, 1);
+                        resource.resourceObjects.Remove(resourceObjToReplace);
+                        Destroy(resourceObjToReplace);
+                        if (resource.resourceObjects.Count == 0)
+                        {
+                            Destroy(resource);
+                        }
+                    }                    
                 }
                 else if (resource.type == ResourceManager.ResourceType.Stone)
                 {
+                    AddRemoveResource(resource.type, 1, MethodHandler.Command.Add);
+                    EventHandler.current.ResourceGathered(worker, resource.type);
+                    Debug.Log("Gathered: " + resource.type);
+                    Talker.TypeThis("Gathered: " + resource.type);
                     var resourceObjToReplace = resource.resourceObjects[0];
                     //GameObject stump = Instantiate((GameObject)Resources.Load("Nature/Stump"), resourceObjToReplace.transform.position, resourceObjToReplace.transform.rotation, resource.transform);
                     //resource.resourceObjects.Remove(resourceObjToReplace);
@@ -243,6 +330,10 @@ public class ResourceManager : MonoBehaviour
             {
                 CreateNewResource(tile, ResourceType.Wood, resourceAmountAtStartWood, workCostWood);
             }
+            if (tile.tag == TagHandler.magicTreeString)
+            {
+                CreateNewResource(tile, ResourceType.Wood, 10, workCostWood);
+            }
             if (tile.tag == TagHandler.resourceStoneString)
             {
                 CreateNewResource(tile, ResourceType.Stone, resourceAmountAtStartStone, workCostStone);
@@ -262,7 +353,7 @@ public class ResourceManager : MonoBehaviour
         var resource = tile.gameObject.AddComponent<Resource>();
         resource.type = type;
         resource.Amount = amount;
-        resource.WorkCost = workCost;
+        resource.CostWork = workCost;
         foreach(Transform child in resource.transform)
         {
             if (child.tag == TagHandler.treeString || child.tag == TagHandler.stoneString)

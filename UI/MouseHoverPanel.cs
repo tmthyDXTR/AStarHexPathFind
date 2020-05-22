@@ -22,6 +22,7 @@ public class MouseHoverPanel : MonoBehaviour
     {
         if (_selection.neighbours.Contains(tile))
         {
+
             if (tile.GetComponent<Resource>() && ( tile.tag == TagHandler.resourceWoodString || tile.tag == TagHandler.resourceStoneString))
             {
                 Resource resource = tile.GetComponent<Resource>();
@@ -46,10 +47,29 @@ public class MouseHoverPanel : MonoBehaviour
                 var hoverAddInfoPanelText = this.transform.Find("mouseHoverAddInfo").GetChild(0).gameObject;
                 hoverAddInfoPanelText.GetComponent<TextMeshProUGUI>().text = $"Yummy soup...";
             }
+            else if (tile.tag == TagHandler.buildingConstructionString)
+            {
+                var building = tile.GetComponent<Building>();
+                hoverPanel.text = "Construct " + building.property;
+                var hoverAddInfoPanelText = this.transform.Find("mouseHoverAddInfo").GetChild(0).gameObject;
+                hoverAddInfoPanelText.GetComponent<TextMeshProUGUI>().text = $"Amount: {building.WorkAmount}\nWorkCost:{building.CostWork}";
+            }
+            else if (tile.item != ItemManager.ItemID.None) // Item?
+            {                
+                hoverPanel.text = "Collect " + tile.item;
+            }
+            else
+            {
+                hoverPanel.text = tile.property.ToString();
+            }
         }
         else if (tile.unit != null)
         {
             hoverPanel.text = tile.unit.name;
+        }
+        else if (tile.item != ItemManager.ItemID.None)
+        {
+            hoverPanel.text = tile.item.ToString();
         }
         else if (tile.tag == TagHandler.buildingWoodStorageString)
         {
@@ -68,6 +88,13 @@ public class MouseHoverPanel : MonoBehaviour
             hoverPanel.text = tile.property.ToString();
             var hoverAddInfoPanelText = this.transform.Find("mouseHoverAddInfo").GetChild(0).gameObject;
             hoverAddInfoPanelText.GetComponent<TextMeshProUGUI>().text = $"{PlayerResources.Fire}/10";
+        }
+        else if (tile.tag == TagHandler.buildingConstructionString)
+        {
+            var building = tile.GetComponent<Building>();
+            hoverPanel.text = "Construction " + building.property;
+            var hoverAddInfoPanelText = this.transform.Find("mouseHoverAddInfo").GetChild(0).gameObject;
+            hoverAddInfoPanelText.GetComponent<TextMeshProUGUI>().text = $"Amount: {building.WorkAmount}\nWorkCost:{building.CostWork}";
         }
         else if (tile.IsDark && !tile.IsDiscoveredFog)
         {

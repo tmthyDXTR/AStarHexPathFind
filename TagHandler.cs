@@ -10,6 +10,7 @@ public static class TagHandler
     public static readonly string walkGroundString = "Ground";
     public static readonly string resourceWoodString = "ResourceTree";
     public static readonly string resourceStoneString = "ResourceStone";
+    public static readonly string magicTreeString = "OldTree";
 
     // Resource Objects
     public static readonly string treeString = "Tree";
@@ -18,9 +19,11 @@ public static class TagHandler
 
     // Buildings
     public static readonly string buildingBonfireString = "BuildingBonfire";
+    public static readonly string buildingBagpackString = "BuildingBagpack";
     public static readonly string buildingConstructionString = "BuildingConstruction";
     public static readonly string buildingWoodStorageString = "BuildingWoodStorage";
     public static readonly string buildingStoneStorageString = "BuildingStoneStorage";
     public static readonly string buildingCauldronString = "BuildingCauldron";
     public static readonly string buildingHouseString = "BuildingHouse";
+
 }

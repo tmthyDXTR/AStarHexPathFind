@@ -9,7 +9,9 @@ public class Tile : MonoBehaviour {
 		Grass,
 		Tree,
 		Stone,
+		OldTree,
 		Bonfire,
+		Bagpack,
 		WoodStorage,
 		StoneStorage,
 		Cauldron,
@@ -17,6 +19,9 @@ public class Tile : MonoBehaviour {
 		Construction,
 	}
 	public Property property;
+
+
+	public ItemManager.ItemID item;
 
 	public enum SelectionStatus
 	{

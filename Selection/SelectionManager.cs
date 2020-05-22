@@ -53,17 +53,21 @@ public class SelectionManager : MonoBehaviour
         EventHandler.current.onMoveAreaCalculated += UpdateNeighboursAndHighlightArea;
         // Very important for "instant" updating highlight area after resource tile got passable because of 
         // resource depletion
-        EventHandler.current.onResourceDestroyed += () => StartCoroutine(SysHelper.WaitForAndExecute(0.1f, () => UpdateNeighboursAndHighlightArea()));
-        EventHandler.current.onResourceDestroyed += () => StartCoroutine(SysHelper.WaitForAndExecute(0.2f, () => UpdateHoveredTile(hoveredTile)));
 
-
+        EventHandler.current.onResourceDestroyed += () => StartCoroutine(SysHelper.WaitForAndExecute(0.05f, () => UpdateNeighboursAndHighlightArea()));
+        EventHandler.current.onResourceDestroyed += () => StartCoroutine(SysHelper.WaitForAndExecute(0.1f, () => UpdateHoveredTile(hoveredTile)));
+        EventHandler.current.onHoverOverUIStart += () => IsActive = false;
+        EventHandler.current.onHoverOverUIEnd += () => IsActive = true;
     }
 
     private void OnDestroy()
     {
         EventHandler.current.onHoverOverTile -= UpdateHoveredTile;
         EventHandler.current.onMoveAreaCalculated -= UpdateNeighboursAndHighlightArea;
-        EventHandler.current.onResourceDestroyed -= () => StartCoroutine(SysHelper.WaitForAndExecute(0.5f, () => UpdateNeighboursAndHighlightArea()));
+        EventHandler.current.onResourceDestroyed -= () => StartCoroutine(SysHelper.WaitForAndExecute(0.05f, () => UpdateNeighboursAndHighlightArea()));
+        EventHandler.current.onResourceDestroyed -= () => StartCoroutine(SysHelper.WaitForAndExecute(0.1f, () => UpdateHoveredTile(hoveredTile)));
+        EventHandler.current.onHoverOverUIStart -= () => IsActive = false;
+        EventHandler.current.onHoverOverUIEnd -= () => IsActive = true;
     }
 
     // Update is called once per frame
@@ -95,6 +99,11 @@ public class SelectionManager : MonoBehaviour
                     {
                         EventHandler.current.OpenBuildingTab();
                     }
+                    // Open Inventory? 
+                    if (clickedObj.tag == TagHandler.buildingBagpackString)
+                    {
+                        EventHandler.current.OpenInventoryTab();
+                    }
                     // If a unit is selected
                     if (currentSelected[0].GetComponent<Unit>())
                     {
@@ -104,7 +113,7 @@ public class SelectionManager : MonoBehaviour
                             Select(clickedObj);
                         }
                         // Move?
-                        if (highlightArea.Count > 0 && highlightArea.Contains(hoveredTile) && !currentSelected[0].GetComponent<Unit>().destTile)
+                        if (highlightArea.Count > 0 && highlightArea.Contains(hoveredTile) && !currentSelected[0].GetComponent<Unit>().destTile && hoveredTile.tag == TagHandler.walkGroundString && hoveredTile.item == ItemManager.ItemID.None)
                         {
                             neighbours.Clear();
                             var unit = currentSelected[0].GetComponent<Unit>();
@@ -128,7 +137,20 @@ public class SelectionManager : MonoBehaviour
                                 //unit.CalculateNewMoveArea(unit.currTile.index, unit.moveRange);
                                     //SysHelper.WaitForAndExecute(1f, () => UpdateNeighboursAndHighlightArea(currentSelected[0].GetComponent<Unit>()));
                             }
-                            // Feed Fire?
+                            // Collect Item?
+                            else if (hoveredTile.item != ItemManager.ItemID.None)
+                            {
+                                InventoryManager.AddItemToInventory(hoveredTile.item);
+                                hoveredTile.item = ItemManager.ItemID.None;
+                                GameObject.Destroy(hoveredTile.transform.Find("Item").gameObject);
+                            }
+                            // Construct a building?
+                            else if (hoveredTile.GetComponent<Building>() && hoveredTile.tag == TagHandler.buildingConstructionString)
+                            {
+                                var unit = currentSelected[0].GetComponent<Unit>();
+                                BuildingManager.ConstructBuilding(unit, hoveredTile.GetComponent<Building>());
+                            }
+                            // Feed bonfire?
                             else if (currentSelected[0].GetComponent<FeedFire>() && hoveredTile.tag == TagHandler.buildingBonfireString)
                             {
                                 ResourceManager.FeedFire(1, PlayerResources.current.bonfire.transform.parent.GetComponent<Resource>());
@@ -171,6 +193,11 @@ public class SelectionManager : MonoBehaviour
                 SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
                 vH.ChangeSelectionStatus(Tile.SelectionStatus.Highlighted);
             }
+            foreach (var item in neighbours)
+            {
+                SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
+                vH.ChangeSelectionStatus(Tile.SelectionStatus.Hovered);
+            }
             if (highlightArea.Contains(hoveredTile))
             {
                 //_aStar.
@@ -204,6 +231,11 @@ public class SelectionManager : MonoBehaviour
 
     private void Select(GameObject obj)
     {
+
+        // Select unit if clicked tile has unit on it
+        if (obj.GetComponent<Tile>() && obj.GetComponent<Tile>().unit != null)
+            obj = obj.GetComponent<Tile>().unit.gameObject;
+
         _selectable = obj.GetComponent<Selectable>();
         _selectable.IsSelected = true;
 
@@ -265,6 +297,11 @@ public class SelectionManager : MonoBehaviour
                 SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
                 vH.ChangeSelectionStatus(Tile.SelectionStatus.Highlighted);
             }
+            foreach (var item in neighbours)
+            {
+                SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
+                vH.ChangeSelectionStatus(Tile.SelectionStatus.Hovered);
+            }
             Debug.Log("Updated Neighbours and Highlight Area");
         }
 
@@ -281,6 +318,16 @@ public class SelectionManager : MonoBehaviour
             foreach (var neighbour in allNeighbours)
             {
                 if (neighbour.GetComponent<Resource>() && !neighbours.Contains(neighbour))
+                {
+                    neighbours.Add(neighbour);
+                }
+            }
+        }
+        if (unit.GetComponent<CollectItems>() != null)
+        {
+            foreach (var neighbour in allNeighbours)
+            {
+                if (neighbour.GetComponent<Tile>().item != ItemManager.ItemID.None && !neighbours.Contains(neighbour))
                 {
                     neighbours.Add(neighbour);
                 }
@@ -311,6 +358,16 @@ public class SelectionManager : MonoBehaviour
             foreach (var neighbour in allNeighbours)
             {
                 if (neighbour.tag == TagHandler.buildingCauldronString && !neighbours.Contains(neighbour))
+                {
+                    neighbours.Add(neighbour);
+                }
+            }
+        }
+        if (unit.GetComponent<ConstructBuilding>() != null)
+        {
+            foreach (var neighbour in allNeighbours)
+            {
+                if (neighbour.tag == TagHandler.buildingConstructionString && !neighbours.Contains(neighbour))
                 {
                     neighbours.Add(neighbour);
                 }
@@ -354,7 +411,13 @@ public class SelectionManager : MonoBehaviour
                 SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
                 vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
             }
+            foreach (var item in neighbours)
+            {
+                SelectionStatusHandler vH = item.GetComponent<SelectionStatusHandler>();
+                vH.ChangeSelectionStatus(Tile.SelectionStatus.Default);
+            }
         }
+        neighbours.Clear();
         highlightArea.Clear();
     }
 

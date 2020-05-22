@@ -15,10 +15,13 @@ public class Map : MonoBehaviour
     public GameObject treePrefab;
     public GameObject rockPrefab;
     public GameObject bonfirePrefab;
+    public GameObject bagpackPrefab;
     public GameObject woodStoragePrefab;
     public GameObject stoneStoragePrefab;
     public GameObject cauldronPrefab;
     public GameObject housePrefab;
+
+    public GameObject oldTreePrefab;
 
     public Grid _grid;
     void Start()
@@ -118,7 +121,7 @@ public class Map : MonoBehaviour
             {
                 GameObject tree = Instantiate(Resources.Load("Nature/" + treePrefab.name), tileTransform.position, Quaternion.Euler(new Vector3(Random.Range(-7f, 7f), Random.Range(0, 360), Random.Range(-7f, 7f))), tileTransform) as GameObject;
                 tree.name = treePrefab.name;
-                var randomScale = Random.Range(0.75f, 1.15f);
+                var randomScale = Random.Range(0.75f, 1.3f);
                 if (i == 0)
                 {
                     tree.transform.position += Vector3.forward * randomOffset + new Vector3(randomDir.x, 0, randomDir.y);
@@ -148,6 +151,26 @@ public class Map : MonoBehaviour
             GameObject rock = Instantiate(Resources.Load("Nature/" + rockPrefab.name), tileTransform.position, Quaternion.identity, tileTransform) as GameObject;
             rock.name = rockPrefab.name;
             rock.transform.localScale += new Vector3(1f, 1f, 1f);
+            tile.Passable = false;
+        }
+        if (newProperty == Tile.Property.OldTree)
+        {
+            meshRen.material = (grassMaterial) ? grassMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+            SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
+            tileMat.originalMat = meshRen.material;
+            tile.tag = TagHandler.magicTreeString;
+            GameObject oldTree = Instantiate(Resources.Load("Nature/" + oldTreePrefab.name), tileTransform.position, Quaternion.identity, tileTransform) as GameObject;
+            oldTree.name = oldTreePrefab.name;
+            tile.Passable = false;
+        }
+        if (newProperty == Tile.Property.Bagpack)
+        {
+            meshRen.material = (grassMaterial) ? grassMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+            SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
+            tileMat.originalMat = meshRen.material;
+            tile.tag = TagHandler.buildingBagpackString;
+            GameObject bagPack = Instantiate(Resources.Load("Buildings/" + bagpackPrefab.name), tileTransform.position, Quaternion.identity, tileTransform) as GameObject;
+            bagPack.name = bagpackPrefab.name;
             tile.Passable = false;
         }
 
@@ -197,7 +220,7 @@ public class Map : MonoBehaviour
             meshRen.material = (dirtMaterial) ? dirtMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
             SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
             tileMat.originalMat = meshRen.material;
-            tile.Passable = true;
+            tile.Passable = false;
             tile.tag = TagHandler.buildingConstructionString;
         }
 

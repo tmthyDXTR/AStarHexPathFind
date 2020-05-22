@@ -13,12 +13,14 @@ public class TileInspector : Editor
 	private Map map;
 	private Transform tiles;
 	private Grid grid;
+	private ItemManager itemManager;
 
 	void OnEnable()
 	{
 		map = GameObject.Find("MapGen").GetComponent<Map>();
 		tiles = GameObject.Find("HexGen").transform;
 		grid = GameObject.Find("HexGen").GetComponent<Grid>();
+		itemManager = GameObject.Find("ItemManager").GetComponent<ItemManager>();
 	}
 
 	public override void OnInspectorGUI()
@@ -36,6 +38,7 @@ public class TileInspector : Editor
 					//VisualHandler vH = child.GetComponent<VisualHandler>();
 					//vH.ChangeVisibility(t.visibility);
 					map.SetTilePropTo(child, t.property);
+					itemManager.SpawnItemAtTile(t, t.item);
 				}
 				foreach (Transform child in tiles)
 				{

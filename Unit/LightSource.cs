@@ -49,18 +49,28 @@ public class LightSource : MonoBehaviour
             }
         }
     }
-    void Start()
+    void OnEnable()
     {
         if (GetComponent<Unit>())
             lightObject = GetComponent<Unit>();
         if (GetComponent<Bonfire>())
             bonfire = GetComponent<Bonfire>();
 
+
         _grid = GameObject.Find("HexGen").GetComponent<Grid>();
         _lightManager = GameObject.Find("LightManager").GetComponent<LightManager>();
         StartCoroutine(SysHelper.WaitForAndExecute(.5f, () => SendLightRays(lightRange)));
     }
 
+    private void OnDestroy()
+    {
+        foreach (var tile in lightArea)
+        {
+            // And remove one from the tiles light counter
+            _lightManager.litTiles[tile]--;
+        }
+        EventHandler.current.LightSourcesUpdated();
+    }
 
     private void SendLightRays(int lightRange)
     {
@@ -72,6 +82,10 @@ public class LightSource : MonoBehaviour
         if (lightObject)
         {
             index = lightObject.currTile.index;
+        }
+        if (gameObject.layer == 20) // Item?
+        {
+            index = this.transform.parent.GetComponent<Tile>().index;
         }
         //StartThreadLightAreaCalculation(lightObject.currTile.index, lightRange);
         CalculateNewLightArea(index, lightRange);

@@ -14,6 +14,50 @@ public class EventHandler : MonoBehaviour
 
 
     // Events
+    public event Action onHoverOverUIEnd;
+    public void HoverOverUIEnd()
+    {
+        if (onHoverOverUIEnd != null)
+        {
+            onHoverOverUIEnd();
+        }
+    }
+    public event Action onHoverOverUIStart;
+    public void HoverOverUIStart()
+    {
+        if (onHoverOverUIStart != null)
+        {
+            onHoverOverUIStart();
+        }
+    }
+
+    public event Action onPlayerTurnEnded;
+    public void EndPlayerTurn()
+    {
+        if (onPlayerTurnEnded != null)
+        {
+            onPlayerTurnEnded();
+        }
+    }
+
+    public event Action<Tile> onConstructionWorkDone;
+    public void ConstructionWorkDone(Tile tile)
+    {
+        if (onConstructionWorkDone != null)
+        {
+            onConstructionWorkDone(tile);
+        }
+    }
+
+    public event Action onBeginBuildingConstruction;
+    public void BeginBuildingConstruction()
+    {
+        if (onBeginBuildingConstruction != null)
+        {
+            onBeginBuildingConstruction();
+        }
+    }
+
     public event Action onSelectedBuildingToBuild;
     public void SelectBuildingToBuild()
     {
@@ -30,6 +74,15 @@ public class EventHandler : MonoBehaviour
         if (onOpenedBuildingTab != null)
         {
             onOpenedBuildingTab(); 
+        }
+    }
+    
+    public event Action onOpenedInventoryTab;
+    public void OpenInventoryTab()
+    {
+        if (onOpenedInventoryTab != null)
+        {
+            onOpenedInventoryTab(); 
         }
     }
 

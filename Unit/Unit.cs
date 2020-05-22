@@ -45,6 +45,7 @@ public class Unit : MonoBehaviour
 
 
         EventHandler.current.onResourceDestroyed += () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
+        EventHandler.current.onBeginBuildingConstruction += () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
         // Calc the move area on new Thread
         //StartThreadMoveAreaCalculation(currTile.index, moveRange);
         StartCoroutine(SysHelper.WaitForAndExecute(0.1f, () => StartThreadMoveAreaCalculation(currTile.index, moveRange)));
@@ -53,6 +54,7 @@ public class Unit : MonoBehaviour
     private void OnDisable()
     {
         EventHandler.current.onResourceDestroyed -= () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
+        EventHandler.current.onBeginBuildingConstruction -= () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
     }
 
     void Update()
@@ -62,27 +64,35 @@ public class Unit : MonoBehaviour
         // Move along path if destination set
         if (destTile)
         {
-            if (!GetComponent<PathFollow>().enabled)
+            if (path.Count > 0)
             {
-                currTile.Passable = true;
-                FollowPath(path);
-                // Must check if moveRange is greater 0
-                // otherwise its stuck at start calculation
-                remainingMoves--;
-                if (remainingMoves < 1)
-                    moveArea.Clear();
-                else
-                    StartThreadMoveAreaCalculation(destTile.index, moveRange);
+                if (!GetComponent<PathFollow>().enabled)
+                {
+                    currTile.Passable = true;
+                    FollowPath(path);
+                    // Must check if moveRange is greater 0
+                    // otherwise its stuck at start calculation
+                    remainingMoves--;
+                    if (remainingMoves < 1)
+                        moveArea.Clear();
+                    else
+                        StartThreadMoveAreaCalculation(destTile.index, moveRange);
+                }
+                // Check if target reached
+                if (Vector3.Distance(this.transform.position, destTile.transform.position) <= 0.05f)
+                {
+                    _light.LightRaySent = false;
+                    destTile = null;
+                    path.Clear();
+                    GetComponent<PathFollow>().enabled = false;
+                    Debug.Log("Path finished");
+                    EventHandler.current.MoveAreaCalculated();
+                }
             }
-            // Check if target reached
-            if (Vector3.Distance(this.transform.position, destTile.transform.position) <= 0.05f)
+            else
             {
-                _light.LightRaySent = false;
+                Debug.Log("Something went wrong with path nodes /path follow");
                 destTile = null;
-                path.Clear();
-                GetComponent<PathFollow>().enabled = false;
-                Debug.Log("Path finished");
-                EventHandler.current.MoveAreaCalculated();
             }
         }
     }

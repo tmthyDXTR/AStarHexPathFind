@@ -19,6 +19,7 @@ public class PathFollow : MonoBehaviour
 
     private Grid _grid;
 
+
     // Use this for initialization
     void OnEnable()
     {
@@ -38,13 +39,14 @@ public class PathFollow : MonoBehaviour
     void CheckNode()
     {
         timer = 0;
-        currentPosHolder = _grid.TileAt(pathNodes[currentNode]).transform.position;
+        currentPosHolder = _grid.TileAt(pathNodes[currentNode]).transform.position;      
     }
 
 
     void Update()
     {
         timer += Time.deltaTime * moveSpeed;
+        this.transform.LookAt(currentPosHolder);
         if (Vector3.Distance(obj.transform.position, currentPosHolder) > 0.05f)
         {
             obj.transform.position = Vector3.Lerp(obj.transform.position, currentPosHolder, timer);
