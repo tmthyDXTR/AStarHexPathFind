@@ -4,6 +4,17 @@ using UnityEngine;
 
 public class Abilities : MonoBehaviour
 {
+    public enum Ability
+    {
+        GatherResources,
+        LightSource,
+        FeedFire,
+        ConsumeFire,
+        CookSoup,
+        ConstructBuilding,
+    }
+
+
     [SerializeField]
     private bool gatherResources = false;
     public bool GatherResources

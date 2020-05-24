@@ -12,14 +12,29 @@ public class InventoryManager : MonoBehaviour
     // Holds all current items in inventory with amount
     private static Dictionary<Item, int> inventoryItems = new Dictionary<Item, int>();
 
+    [SerializeField]
+    private List<Item> collectedItems = new List<Item>();
     private void Start()
     {
-        Item item = (Item)Resources.Load("Items/FireTreeSeed");
+        ///
+        ///Inventory Debug
+        ///
+
+        Item item = (Item)Resources.Load("Items/Item_GlowingTreeSeed");
+        Item item2 = (Item)Resources.Load("Items/Weapon_WilfredWaldfried");
         inventoryItems.Add(item, 1);
+        inventoryItems.Add(item2, 1);
 
-        EquipItem(item, GameObject.Find("Lumber Jack"));
+        //EquipItem(item2, GameObject.Find("Lumber Jack"));
+        //StartCoroutine(SysHelper.WaitForAndExecute(2, () => EquipItem(item2, GameObject.Find("Lumber Jack"))));
 
-        StartCoroutine(SysHelper.WaitForAndExecute(2, () => UnequipItem(item, GameObject.Find("Lumber Jack"))));
+        //StartCoroutine(SysHelper.WaitForAndExecute(2, () => UnequipItem(item, GameObject.Find("Lumber Jack"))));
+        //StartCoroutine(SysHelper.WaitForAndExecute(5, () => UnequipItem(item2, GameObject.Find("Lumber Jack"))));
+    }
+
+    public Dictionary<Item, int> GetInventoryItems()
+    {
+        return inventoryItems;
     }
 
 
@@ -32,7 +47,7 @@ public class InventoryManager : MonoBehaviour
             obj.GetComponent<Effects>().unitEffects.Remove(effect);
             EffectManager.DeinitializeEffect(effect, obj);
         }
-
+        AddItemToInventory(item);
         Debug.Log(obj.name + " unequipped " + item);
     }
     public static void EquipItem(Item item, GameObject obj)
@@ -44,7 +59,7 @@ public class InventoryManager : MonoBehaviour
             obj.GetComponent<Effects>().unitEffects.Add(effect);
             EffectManager.InitializeEffect(effect, obj);
         }
-
+        RemoveItemFromInventory(item);
         Debug.Log(obj.name + " equipped " + item);
     }
 
@@ -58,7 +73,7 @@ public class InventoryManager : MonoBehaviour
         {
             inventoryItems[item] = amount;
         }
-
+        GameObject.Find("InventoryManager").GetComponent<InventoryManager>().collectedItems.Add(item);
         // Event
 
 

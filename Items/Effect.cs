@@ -11,18 +11,25 @@ public class Effect : ScriptableObject
         Passive,
         Active,
     }
-    public enum Mod
+    public enum PassiveMod
     {
+        // Ranges
         GiveLightRange,
-        AddLightRange,
-        AddMoveRange,
-        AddFireDamage,
+        IncreaseLightRange,
+        IncreaseMoveRange,
+
+        // Dmg
+        IncreaseFireDmg,
+
+        // Ability
+        GiveAbility,
     }
 
 
     public BaseType baseType;
-    public Mod mod;
+    public PassiveMod passiveMod;
 
 
     public int amount;
+    public Abilities.Ability ability;
 }

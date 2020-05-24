@@ -6,5 +6,5 @@ public class UnitInventory : MonoBehaviour
 {
     public List<Item> equippedItems = new List<Item>();
 
-
+    
 }

@@ -9,15 +9,11 @@ using UnityEngine.UI;
 /// </summary>
 public class UnitInventoryTab : MonoBehaviour
 {
-    SelectionManager _selection;
 
-    public GameObject buttonPrefab;
 
     private void OnEnable()
     {
 
-        _selection = GameObject.Find("SelectionManager").GetComponent<SelectionManager>();
-        buttonPrefab = (GameObject)Resources.Load("UI/InventoryButton");
         EventHandler.current.HoverOverUIStart();
     }
 

@@ -54,9 +54,9 @@ public class MouseHoverPanel : MonoBehaviour
                 var hoverAddInfoPanelText = this.transform.Find("mouseHoverAddInfo").GetChild(0).gameObject;
                 hoverAddInfoPanelText.GetComponent<TextMeshProUGUI>().text = $"Amount: {building.WorkAmount}\nWorkCost:{building.CostWork}";
             }
-            else if (tile.item != null) // Item?
+            else if (tile.item != ItemManager.ID.None) // Item?
             {                
-                hoverPanel.text = "Collect " + tile.item;
+                hoverPanel.text = "Collect " + ItemManager.GetItem(tile.item).nameText;
             }
             else
             {
@@ -67,9 +67,9 @@ public class MouseHoverPanel : MonoBehaviour
         {
             hoverPanel.text = tile.unit.name;
         }
-        else if (tile.item != null)
+        else if (tile.item != ItemManager.ID.None)
         {
-            hoverPanel.text = tile.item.ToString();
+            hoverPanel.text = ItemManager.GetItem(tile.item).nameText;
         }
         else if (tile.tag == TagHandler.buildingWoodStorageString)
         {

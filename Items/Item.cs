@@ -12,7 +12,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "new Item", menuName = "ScriptableObjects/Item")]
 public class Item : ScriptableObject
 {
-    public ItemManager.ItemID ID;
+    public ItemManager.ID ID;
+    public Type type;
+    public string nameText;
     public string infoText;
 
     public GameObject prefab;
@@ -21,4 +23,11 @@ public class Item : ScriptableObject
     public List<Effect> effects;
 
 
+
+    public enum Type
+    {
+        Curiosity,
+        Weapon,
+
+    }
 }

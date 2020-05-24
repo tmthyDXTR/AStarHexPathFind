@@ -13,10 +13,15 @@ public class EffectInspector : Editor
     //Add the ShowOnEnum methods in here
     private void SetFieldCondition()
     {
-        ShowOnEnum("mod", Effect.Mod.AddLightRange.ToString(), "amount"); //type1Var is only visible when type == Type1
-        ShowOnEnum("mod", Effect.Mod.AddMoveRange.ToString(), "amount"); //type1Var is only visible when type == Type1
-        ShowOnEnum("mod", Effect.Mod.AddFireDamage.ToString(), "amount"); //type1Var is only visible when type == Type1
-        ShowOnEnum("mod", Effect.Mod.GiveLightRange.ToString(), "amount"); //type1Var is only visible when type == Type1
+        ShowOnEnum("baseType", Effect.BaseType.Passive.ToString(), "passiveMod"); //type1Var is only visible when type == Type1
+        
+        ShowOnEnum("passiveMod", Effect.PassiveMod.IncreaseLightRange.ToString(), "amount"); //type1Var is only visible when type == Type1
+        ShowOnEnum("passiveMod", Effect.PassiveMod.IncreaseMoveRange.ToString(), "amount"); //type1Var is only visible when type == Type1
+        ShowOnEnum("passiveMod", Effect.PassiveMod.IncreaseFireDmg.ToString(), "amount"); //type1Var is only visible when type == Type1
+        ShowOnEnum("passiveMod", Effect.PassiveMod.GiveLightRange.ToString(), "amount"); //type1Var is only visible when type == Type1
+        
+        ShowOnEnum("passiveMod", Effect.PassiveMod.GiveAbility.ToString(), "ability"); //type1Var is only visible when type == Type1
+
 
 
     }

@@ -34,8 +34,8 @@ public class PanelController : MonoBehaviour
         tilePanelPrefab = (GameObject)Resources.Load("UI/TilePanel");
         mouseHoverPanelPrefab = (GameObject)Resources.Load("UI/MouseHoverPanel");
         buildingTabPrefab = (GameObject)Resources.Load("UI/BuildingTab");
-        inventoryTabPrefab = (GameObject)Resources.Load("UI/InventoryTab");
-        unitInventoryTabPrefab = (GameObject)Resources.Load("UI/UnitInventoryTab");
+        inventoryTabPrefab = (GameObject)Resources.Load("UI/UI_Inventory");
+        unitInventoryTabPrefab = (GameObject)Resources.Load("UI/UI_UnitInventory");
 
         EventHandler.current.onFireConsumed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
         EventHandler.current.onFireFed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
@@ -110,12 +110,15 @@ public class PanelController : MonoBehaviour
     private void CreateInventoryTab()
     {
         DestroyAllPanels();
-        var panelPos = new Vector3(SelectionManager.hoveredTile.transform.position.x, 4.25f, SelectionManager.hoveredTile.transform.position.z);
-        inventoryTab = Instantiate(inventoryTabPrefab, panelPos, Camera.main.transform.rotation, GameObject.Find("UI_WorldSpaceCanvas").transform);
+        //var panelPos = new Vector3(SelectionManager.hoveredTile.transform.position.x, 4.25f, SelectionManager.hoveredTile.transform.position.z);
+        //inventoryTab = Instantiate(inventoryTabPrefab, panelPos, Camera.main.transform.rotation, GameObject.Find("UI_PanelCanvas").transform);
+        unitInventoryTab = Instantiate(unitInventoryTabPrefab, GameObject.Find("UI_PanelCanvas").transform);
+
+        inventoryTab = Instantiate(inventoryTabPrefab, GameObject.Find("UI_PanelCanvas").transform);
         //inventoryTab.GetComponent<InventoryTab>().UpdateInventoryTab();
-        var unitPanelPos = new Vector3(SelectionManager.hoveredTile.transform.position.x-10, 4.25f, SelectionManager.hoveredTile.transform.position.z);
-        unitInventoryTab = Instantiate(unitInventoryTabPrefab, unitPanelPos, Camera.main.transform.rotation, GameObject.Find("UI_WorldSpaceCanvas").transform);
-        unitInventoryTab.GetComponent<UnitInventoryTab>().UpdateUnitInventoryTab();
+        //var unitPanelPos = new Vector3(SelectionManager.hoveredTile.transform.position.x-10, 4.25f, SelectionManager.hoveredTile.transform.position.z);
+        //unitInventoryTab = Instantiate(unitInventoryTabPrefab, unitPanelPos, Camera.main.transform.rotation, GameObject.Find("UI_PanelCanvas").transform);
+        //unitInventoryTab.GetComponent<UnitInventoryTab>().UpdateUnitInventoryTab();
     }
 
 

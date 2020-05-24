@@ -113,7 +113,7 @@ public class SelectionManager : MonoBehaviour
                             Select(clickedObj);
                         }
                         // Move?
-                        if (highlightArea.Count > 0 && highlightArea.Contains(hoveredTile) && !currentSelected[0].GetComponent<Unit>().destTile && hoveredTile.tag == TagHandler.walkGroundString && hoveredTile.item == null)
+                        if (highlightArea.Count > 0 && highlightArea.Contains(hoveredTile) && !currentSelected[0].GetComponent<Unit>().destTile && hoveredTile.tag == TagHandler.walkGroundString && hoveredTile.item == ItemManager.ID.None)
                         {
                             neighbours.Clear();
                             var unit = currentSelected[0].GetComponent<Unit>();
@@ -138,11 +138,20 @@ public class SelectionManager : MonoBehaviour
                                     //SysHelper.WaitForAndExecute(1f, () => UpdateNeighboursAndHighlightArea(currentSelected[0].GetComponent<Unit>()));
                             }
                             // Collect Item?
-                            else if (hoveredTile.item != null)
+                            else if (hoveredTile.item != ItemManager.ID.None)
                             {
-                                InventoryManager.AddItemToInventory(hoveredTile.item);
-                                hoveredTile.item = null;
-                                GameObject.Destroy(hoveredTile.transform.Find("Item").gameObject);
+                                InventoryManager.AddItemToInventory(ItemManager.itemDict[hoveredTile.item]);
+                                hoveredTile.item = ItemManager.ID.None;
+                                GameObject objToDestroy = null;
+                                foreach (Transform child in hoveredTile.transform)
+                                {
+                                    if (child.gameObject.layer == 20) // Item
+                                    {
+                                        objToDestroy = child.gameObject; 
+                                        break;
+                                    }
+                                }
+                                GameObject.Destroy(objToDestroy);
                             }
                             // Construct a building?
                             else if (hoveredTile.GetComponent<Building>() && hoveredTile.tag == TagHandler.buildingConstructionString)
@@ -327,7 +336,7 @@ public class SelectionManager : MonoBehaviour
         {
             foreach (var neighbour in allNeighbours)
             {
-                if (neighbour.GetComponent<Tile>().item != null && !neighbours.Contains(neighbour))
+                if (neighbour.GetComponent<Tile>().item != ItemManager.ID.None && !neighbours.Contains(neighbour))
                 {
                     neighbours.Add(neighbour);
                 }

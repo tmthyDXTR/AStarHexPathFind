@@ -21,7 +21,7 @@ public class Tile : MonoBehaviour {
 	public Property property;
 
 
-	public Item item;
+	public ItemManager.ID item;
 
 	public enum SelectionStatus
 	{
