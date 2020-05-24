@@ -5,55 +5,85 @@ using UnityEngine;
 
 
 /// <summary>
-/// This class handles the buildings
+/// This class handles the Inventory and item transfer methods
 /// </summary>
 public class InventoryManager : MonoBehaviour
 {
     // Holds all current items in inventory with amount
-    public static Dictionary<ItemManager.ItemID, int> inventoryItems = new Dictionary<ItemManager.ItemID, int>();
+    private static Dictionary<Item, int> inventoryItems = new Dictionary<Item, int>();
 
-
-    //private void Start()
-    //{
-    //    AddItemToInventory(ItemManager.ItemID.FireTreeSeed, 1);
-    //}
-
-
-    public static void AddItemToInventory(ItemManager.ItemID itemID, int amount = 1)
+    private void Start()
     {
-        if (inventoryItems.ContainsKey(itemID))
+        Item item = (Item)Resources.Load("Items/FireTreeSeed");
+        inventoryItems.Add(item, 1);
+
+        EquipItem(item, GameObject.Find("Lumber Jack"));
+
+        StartCoroutine(SysHelper.WaitForAndExecute(2, () => UnequipItem(item, GameObject.Find("Lumber Jack"))));
+    }
+
+
+    public static void UnequipItem(Item item, GameObject obj)
+    {
+        obj.GetComponent<UnitInventory>().equippedItems.Remove(item);
+
+        foreach (var effect in item.effects)
         {
-            inventoryItems[itemID] += amount;
+            obj.GetComponent<Effects>().unitEffects.Remove(effect);
+            EffectManager.DeinitializeEffect(effect, obj);
+        }
+
+        Debug.Log(obj.name + " unequipped " + item);
+    }
+    public static void EquipItem(Item item, GameObject obj)
+    {
+        obj.GetComponent<UnitInventory>().equippedItems.Add(item);
+
+        foreach (var effect in item.effects)
+        {
+            obj.GetComponent<Effects>().unitEffects.Add(effect);
+            EffectManager.InitializeEffect(effect, obj);
+        }
+
+        Debug.Log(obj.name + " equipped " + item);
+    }
+
+    public static void AddItemToInventory(Item item, int amount = 1)
+    {
+        if (inventoryItems.ContainsKey(item))
+        {
+            inventoryItems[item] += amount;
         }
         else
         {
-            inventoryItems[itemID] = amount;
+            inventoryItems[item] = amount;
         }
 
         // Event
 
 
-        Debug.Log("Added " + amount + " " + itemID + " to Inventory.");
+        Debug.Log("Added " + amount + " " + item + " to Inventory.");
     }
 
-    public static void RemoveItemFromInventory(ItemManager.ItemID itemID, int amount = 1)
+    public static void RemoveItemFromInventory(Item item, int amount = 1)
     {
-        if (inventoryItems.ContainsKey(itemID))
+        if (inventoryItems.ContainsKey(item))
         {
-            if (inventoryItems[itemID] >= amount)
+            if (inventoryItems[item] >= amount)
             {
-                inventoryItems[itemID] -= amount;
-                if (inventoryItems[itemID] == 0)
+                inventoryItems[item] -= amount;
+                if (inventoryItems[item] == 0)
                 {
-                    inventoryItems.Remove(itemID);
+                    inventoryItems.Remove(item);
                 }
 
                 // Event
 
 
-                Debug.Log("Removed " + amount + " " + itemID + " from Inventory.");
+                Debug.Log("Removed " + amount + " " + item + " from Inventory.");
 
             }
         }
     }
+
 }

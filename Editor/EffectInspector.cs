@@ -5,19 +5,20 @@ using System.Collections.Generic;
 using System.Reflection;
 
 
-[CustomEditor(typeof(Item))]
+[CustomEditor(typeof(Effect))]      
 [CanEditMultipleObjects]
-public class ItemInspector : Editor
+public class EffectInspector : Editor
 {
 
     //Add the ShowOnEnum methods in here
     private void SetFieldCondition()
     {
-        //ShowOnEnum("type", Item.Type.MultipleUses.ToString(), "charges"); //type1Var is only visible when type == Type1
-        //ShowOnEnum("effect_1", ItemManager.Effect.AddMoveRange.ToString(), "effect1Amount"); //type1Var is only visible when type == Type1
-        //ShowOnEnum("effect_1", ItemManager.Effect.MinusMoveRange.ToString(), "effect1Amount"); //type1Var is only visible when type == Type1
-        
-  
+        ShowOnEnum("mod", Effect.Mod.AddLightRange.ToString(), "amount"); //type1Var is only visible when type == Type1
+        ShowOnEnum("mod", Effect.Mod.AddMoveRange.ToString(), "amount"); //type1Var is only visible when type == Type1
+        ShowOnEnum("mod", Effect.Mod.AddFireDamage.ToString(), "amount"); //type1Var is only visible when type == Type1
+        ShowOnEnum("mod", Effect.Mod.GiveLightRange.ToString(), "amount"); //type1Var is only visible when type == Type1
+
+
     }
 
     /////////////////////////////////////////////////////////

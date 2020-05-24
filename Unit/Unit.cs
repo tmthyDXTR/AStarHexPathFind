@@ -14,6 +14,7 @@ public class Unit : MonoBehaviour
     public int remainingMoves = 3;
 
     // Internal Variables
+    private Stats _stats;
     private SelectionManager _selection;
     private Grid _grid;
     private LightSource _light;
@@ -42,19 +43,26 @@ public class Unit : MonoBehaviour
         _selection = GameObject.Find("SelectionManager").GetComponent<SelectionManager>();
         _grid = GameObject.Find("HexGen").GetComponent<Grid>();
         _light = GetComponent<LightSource>();
+        _stats = GetComponent<Stats>();
+
+        // Initialize Base Stats
+        moveRange = _stats.GetMoveRange;
 
 
-        EventHandler.current.onResourceDestroyed += () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
-        EventHandler.current.onBeginBuildingConstruction += () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
+        EventHandler.current.onResourceDestroyed += () => StartThreadMoveAreaCalculation(currTile.index, _stats.GetMoveRange);
+        EventHandler.current.onBeginBuildingConstruction += () => StartThreadMoveAreaCalculation(currTile.index, _stats.GetMoveRange);
+        EventHandler.current.onItemEquipped  += () => StartThreadMoveAreaCalculation(currTile.index, _stats.GetMoveRange);
         // Calc the move area on new Thread
         //StartThreadMoveAreaCalculation(currTile.index, moveRange);
-        StartCoroutine(SysHelper.WaitForAndExecute(0.1f, () => StartThreadMoveAreaCalculation(currTile.index, moveRange)));
+        StartCoroutine(SysHelper.WaitForAndExecute(0.1f, () => StartThreadMoveAreaCalculation(currTile.index, _stats.GetMoveRange)));
     }
 
     private void OnDisable()
     {
-        EventHandler.current.onResourceDestroyed -= () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
-        EventHandler.current.onBeginBuildingConstruction -= () => StartThreadMoveAreaCalculation(currTile.index, moveRange);
+        EventHandler.current.onResourceDestroyed -= () => StartThreadMoveAreaCalculation(currTile.index, _stats.GetMoveRange);
+        EventHandler.current.onBeginBuildingConstruction -= () => StartThreadMoveAreaCalculation(currTile.index, _stats.GetMoveRange);
+        EventHandler.current.onItemEquipped -= () => StartThreadMoveAreaCalculation(currTile.index, _stats.GetMoveRange);
+
     }
 
     void Update()
@@ -76,7 +84,7 @@ public class Unit : MonoBehaviour
                     if (remainingMoves < 1)
                         moveArea.Clear();
                     else
-                        StartThreadMoveAreaCalculation(destTile.index, moveRange);
+                        StartThreadMoveAreaCalculation(destTile.index, _stats.GetMoveRange);
                 }
                 // Check if target reached
                 if (Vector3.Distance(this.transform.position, destTile.transform.position) <= 0.05f)

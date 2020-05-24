@@ -113,7 +113,7 @@ public class SelectionManager : MonoBehaviour
                             Select(clickedObj);
                         }
                         // Move?
-                        if (highlightArea.Count > 0 && highlightArea.Contains(hoveredTile) && !currentSelected[0].GetComponent<Unit>().destTile && hoveredTile.tag == TagHandler.walkGroundString && hoveredTile.item == ItemManager.ItemID.None)
+                        if (highlightArea.Count > 0 && highlightArea.Contains(hoveredTile) && !currentSelected[0].GetComponent<Unit>().destTile && hoveredTile.tag == TagHandler.walkGroundString && hoveredTile.item == null)
                         {
                             neighbours.Clear();
                             var unit = currentSelected[0].GetComponent<Unit>();
@@ -138,10 +138,10 @@ public class SelectionManager : MonoBehaviour
                                     //SysHelper.WaitForAndExecute(1f, () => UpdateNeighboursAndHighlightArea(currentSelected[0].GetComponent<Unit>()));
                             }
                             // Collect Item?
-                            else if (hoveredTile.item != ItemManager.ItemID.None)
+                            else if (hoveredTile.item != null)
                             {
                                 InventoryManager.AddItemToInventory(hoveredTile.item);
-                                hoveredTile.item = ItemManager.ItemID.None;
+                                hoveredTile.item = null;
                                 GameObject.Destroy(hoveredTile.transform.Find("Item").gameObject);
                             }
                             // Construct a building?
@@ -327,7 +327,7 @@ public class SelectionManager : MonoBehaviour
         {
             foreach (var neighbour in allNeighbours)
             {
-                if (neighbour.GetComponent<Tile>().item != ItemManager.ItemID.None && !neighbours.Contains(neighbour))
+                if (neighbour.GetComponent<Tile>().item != null && !neighbours.Contains(neighbour))
                 {
                     neighbours.Add(neighbour);
                 }

@@ -45,14 +45,26 @@ public class LightSource : MonoBehaviour
             lightRaySent = value;
             if (!lightRaySent)
             {
-                SendLightRays(lightRange);
+                if (GetComponent<Stats>() != null)
+                {
+                    SendLightRays(GetComponent<Stats>().GetLightRange);
+                }
+                else
+                {
+                    SendLightRays(lightRange);
+                }
             }
         }
     }
-    void OnEnable()
+    void Start()
     {
+        // Initialize Base Stats
         if (GetComponent<Unit>())
+        {
             lightObject = GetComponent<Unit>();
+            lightRange = GetComponent<Stats>().GetLightRange;
+            EventHandler.current.onStatsChanged += () => SendLightRays(GetComponent<Stats>().GetLightRange);
+        }
         if (GetComponent<Bonfire>())
             bonfire = GetComponent<Bonfire>();
 
@@ -69,7 +81,12 @@ public class LightSource : MonoBehaviour
             // And remove one from the tiles light counter
             _lightManager.litTiles[tile]--;
         }
-        EventHandler.current.LightSourcesUpdated();
+        if (GetComponent<Unit>())
+        {
+            EventHandler.current.onStatsChanged -= () => SendLightRays(GetComponent<Stats>().GetLightRange);
+        }
+
+            EventHandler.current.LightSourcesUpdated();
     }
 
     private void SendLightRays(int lightRange)

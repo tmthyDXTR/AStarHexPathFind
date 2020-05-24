@@ -34,8 +34,8 @@ public class OldTree : MonoBehaviour
             Light light = GameObject.Find("Directional Light").GetComponent<Light>();
             light.color = new Color(0.5928696f, 0.5764706f, 0.9607843f, 1);
 
-            ItemManager itemManager = GameObject.Find("ItemManager").GetComponent<ItemManager>();
-            itemManager.SpawnItemAtTile(transform.parent.GetComponent<Tile>(), ItemManager.ItemID.FireTreeSeed);
+            //ItemManager itemManager = GameObject.Find("ItemManager").GetComponent<ItemManager>();
+            //itemManager.SpawnItemAtTile(transform.parent.GetComponent<Tile>(), ItemManager.ItemID.FireTreeSeed);
         }
     }
 

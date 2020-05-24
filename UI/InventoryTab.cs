@@ -18,26 +18,27 @@ public class InventoryTab : MonoBehaviour
     {
         _selection = GameObject.Find("SelectionManager").GetComponent<SelectionManager>();
         //_inventory = GameObject.Find("InventoryManager").GetComponent<InventoryManager>();
-        buttonPrefab = (GameObject)Resources.Load("UI/Button");
+        buttonPrefab = (GameObject)Resources.Load("UI/InventoryButton");
         EventHandler.current.HoverOverUIStart();
     }
 
-    public void UpdateInventoryTab()
-    {
-        // Create a Button for every item in the building manager list
-        foreach (var itemEntry in InventoryManager.inventoryItems)
-        {
-            var buttonObj = Instantiate(buttonPrefab, this.transform);
-            var buttonText = buttonObj.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-            buttonText.text = itemEntry.Key.ToString();
-            var button = buttonObj.GetComponent<Button>();
-            //button.onClick.RemoveAllListeners();
-            //button.onClick.AddListener(() => _inventory.SelectBuildingToBuild(itemEntry.Key, itemEntry.Value));
-        }
+    //public void UpdateInventoryTab()
+    //{
+    //    // Create a Button for every item in the building manager list
+    //    foreach (var itemEntry in InventoryManager.inventoryItems)
+    //    {
+    //        var buttonObj = Instantiate(buttonPrefab, this.transform);
+    //        var buttonText = buttonObj.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+    //        buttonText.text = "[" + itemEntry.Value.ToString() + "] " + itemEntry.Key.ToString();
+    //        var button = buttonObj.GetComponent<InventoryButton>();
+    //        button.itemID = itemEntry.Key;
+    //        //button.onClick.RemoveAllListeners();
+    //        //button.onClick.AddListener(() => _inventory.SelectBuildingToBuild(itemEntry.Key, itemEntry.Value));
+    //    }
 
 
-        Debug.Log("Inventory tab updated");
-    }
+    //    Debug.Log("Inventory tab updated");
+    //}
 
 
 

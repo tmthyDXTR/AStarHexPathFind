@@ -14,6 +14,41 @@ public class EventHandler : MonoBehaviour
 
 
     // Events
+    public event Action onAbilitiesChanged;
+    public void AbilitiesChanged()
+    {
+        if (onAbilitiesChanged != null)
+        {
+            onAbilitiesChanged();
+        }
+    }
+
+    public event Action onStatsChanged;
+    public void StatsChanged()
+    {
+        if (onStatsChanged != null)
+        {
+            onStatsChanged();
+        }
+    }
+
+    public event Action onItemEquipped;
+    public void ItemEquipped()
+    {
+        if (onItemEquipped != null)
+        {
+            onItemEquipped();
+        }
+    }
+    public event Action onItemUnequipped;
+    public void ItemUnequipped()
+    {
+        if (onItemUnequipped != null)
+        {
+            onItemUnequipped();
+        }
+    }
+
     public event Action onHoverOverUIEnd;
     public void HoverOverUIEnd()
     {

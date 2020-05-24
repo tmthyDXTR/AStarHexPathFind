@@ -11,6 +11,7 @@ public class PanelController : MonoBehaviour
     private GameObject mouseHoverPanelPrefab;
     private GameObject buildingTabPrefab;
     private GameObject inventoryTabPrefab;
+    private GameObject unitInventoryTabPrefab;
 
 
     // Runtime instantiated panels
@@ -24,6 +25,9 @@ public class PanelController : MonoBehaviour
     GameObject buildingTab; 
     [SerializeField]
     GameObject inventoryTab;
+    [SerializeField]
+    GameObject unitInventoryTab;
+
     void Start()
     {
         unitPanelPrefab = (GameObject)Resources.Load("UI/UnitPanel");
@@ -31,6 +35,7 @@ public class PanelController : MonoBehaviour
         mouseHoverPanelPrefab = (GameObject)Resources.Load("UI/MouseHoverPanel");
         buildingTabPrefab = (GameObject)Resources.Load("UI/BuildingTab");
         inventoryTabPrefab = (GameObject)Resources.Load("UI/InventoryTab");
+        unitInventoryTabPrefab = (GameObject)Resources.Load("UI/UnitInventoryTab");
 
         EventHandler.current.onFireConsumed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
         EventHandler.current.onFireFed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
@@ -45,6 +50,9 @@ public class PanelController : MonoBehaviour
 
         EventHandler.current.onSelectedBuildingToBuild += DestroyAllPanels;
         EventHandler.current.onConstructionWorkDone += CreateMouseHoverPanel;
+        EventHandler.current.onItemEquipped += CreateInventoryTab;
+        EventHandler.current.onItemUnequipped += CreateInventoryTab;
+
     }
     private void OnDestroy()
     {
@@ -60,6 +68,8 @@ public class PanelController : MonoBehaviour
         EventHandler.current.onOpenedInventoryTab -= CreateInventoryTab;
         EventHandler.current.onSelectedBuildingToBuild -= DestroyAllPanels;
         EventHandler.current.onConstructionWorkDone -= CreateMouseHoverPanel;
+        EventHandler.current.onItemEquipped -= CreateInventoryTab;
+        EventHandler.current.onItemUnequipped -= CreateInventoryTab;
 
     }
     private void DestroyAllPanels()
@@ -84,6 +94,10 @@ public class PanelController : MonoBehaviour
         {
             GameObject.Destroy(inventoryTab);
         }
+        if (unitInventoryTab)
+        {
+            GameObject.Destroy(unitInventoryTab);
+        }
     }
 
     private void CreateBuildingTab()
@@ -98,7 +112,10 @@ public class PanelController : MonoBehaviour
         DestroyAllPanels();
         var panelPos = new Vector3(SelectionManager.hoveredTile.transform.position.x, 4.25f, SelectionManager.hoveredTile.transform.position.z);
         inventoryTab = Instantiate(inventoryTabPrefab, panelPos, Camera.main.transform.rotation, GameObject.Find("UI_WorldSpaceCanvas").transform);
-        inventoryTab.GetComponent<InventoryTab>().UpdateInventoryTab();
+        //inventoryTab.GetComponent<InventoryTab>().UpdateInventoryTab();
+        var unitPanelPos = new Vector3(SelectionManager.hoveredTile.transform.position.x-10, 4.25f, SelectionManager.hoveredTile.transform.position.z);
+        unitInventoryTab = Instantiate(unitInventoryTabPrefab, unitPanelPos, Camera.main.transform.rotation, GameObject.Find("UI_WorldSpaceCanvas").transform);
+        unitInventoryTab.GetComponent<UnitInventoryTab>().UpdateUnitInventoryTab();
     }
 
 
