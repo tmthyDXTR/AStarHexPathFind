@@ -5,19 +5,23 @@ using System.ComponentModel.DataAnnotations;
 
 public class ItemManager : MonoBehaviour
 {
+    public static ItemManager current;
 
-    public static Dictionary<ID, Item> itemDict = new Dictionary<ID, Item>();
+    public Dictionary<ItemId, Item> itemDict = new Dictionary<ItemId, Item>();
 
     void Awake()
     {
+        current = this;
+
         // Add all items to the item dictionary at start
-        itemDict.Add(ID.Item_GlowingTreeSeed, (Item)Resources.Load("Items/Item_GlowingTreeSeed"));
-        itemDict.Add(ID.Item_OldGrindingStone, (Item)Resources.Load("Items/Item_OldGrindingStone"));
+        itemDict.Add(ItemId.Item_GlowingTreeSeed, (Item)Resources.Load("Items/" + ItemId.Item_GlowingTreeSeed));
+        itemDict.Add(ItemId.Item_OldGrindingStone, (Item)Resources.Load("Items/" + ItemId.Item_OldGrindingStone));
+        itemDict.Add(ItemId.Weapon_WilfredWaldfried, (Item)Resources.Load("Items/" + ItemId.Weapon_WilfredWaldfried));
 
     }
 
 
-    public enum ID
+    public enum ItemId
     {
         None,
         // Items
@@ -29,17 +33,17 @@ public class ItemManager : MonoBehaviour
 
     }
     
-    public static Item GetItem(ID id)
+    public Item GetItem(ItemId id)
     {
         Item item = (Item)Resources.Load("Items/" + id);
         return item;
     }
 
-    public void SpawnItemAtTile(Tile tile, ItemManager.ID item)
+    public void SpawnItemAtTile(Tile tile, ItemManager.ItemId item)
     {        
-        if (item != ItemManager.ID.None)
+        if (item != ItemManager.ItemId.None)
         {
-            var itemObj = CreateItemObject(tile.transform, ItemManager.GetItem(item));
+            var itemObj = CreateItemObject(tile.transform, ItemManager.current.GetItem(item));
 
             tile.item = item;
 

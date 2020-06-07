@@ -15,6 +15,7 @@ public class EffectManager : MonoBehaviour
         Stats stats = obj.GetComponent<Stats>();
         Abilities abilities = obj.GetComponent<Abilities>();
 
+        #region Ranges
         // Ranges
         if (effect.passiveMod == Effect.PassiveMod.IncreaseLightRange)
         {
@@ -40,13 +41,19 @@ public class EffectManager : MonoBehaviour
         {
             stats.MoveRangeMod(effect.amount);
         }
+        #endregion
 
+
+        #region Damage
         // Damage
         if (effect.passiveMod == Effect.PassiveMod.IncreaseFireDmg)
         {
             stats.FireDmgMod(effect.amount);
         }
+        #endregion
 
+
+        #region Abilities
         // Abilities
         if (effect.passiveMod == Effect.PassiveMod.GiveAbility)
         {
@@ -55,6 +62,9 @@ public class EffectManager : MonoBehaviour
                 abilities.GatherResources = true;
             }
         }
+        #endregion
+
+
     }
     public static void DeinitializeEffect(Effect effect, GameObject obj)
     {

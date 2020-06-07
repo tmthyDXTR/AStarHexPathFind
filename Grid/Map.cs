@@ -9,6 +9,7 @@ public class Map : MonoBehaviour
     private Transform hex;
 
     public Material grassMaterial;
+    public Material waterMaterial;
     public Material rockMaterial;
     public Material dirtMaterial;
 
@@ -31,6 +32,7 @@ public class Map : MonoBehaviour
             _grid = hex.GetComponent<Grid>();
 
         grassMaterial = (Material)Resources.Load("Materials/GrassMat");
+        waterMaterial = (Material)Resources.Load("Materials/WaterMat");
         rockMaterial = (Material)Resources.Load("Materials/RockMat");
         dirtMaterial = (Material)Resources.Load("Materials/DirtMat");
         
@@ -141,6 +143,13 @@ public class Map : MonoBehaviour
             tileMat.originalMat = meshRen.material;
             tile.Passable = true;
             tile.tag = TagHandler.walkGroundString;
+        }
+        if (newProperty == Tile.Property.Water)
+        {
+            meshRen.material = (waterMaterial) ? waterMaterial : UnityEditor.AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+            SelectionStatusHandler tileMat = tileTransform.GetComponent<SelectionStatusHandler>();
+            tileMat.originalMat = meshRen.material;
+            tile.Passable = false;
         }
         if (newProperty == Tile.Property.Stone)
         {

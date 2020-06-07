@@ -110,18 +110,19 @@ public class Abilities : MonoBehaviour
 
     private void InitializeAbilities()
     {
-        if (gatherResources)
-        {
-            if (this.gameObject.GetComponent<GatherResource>() == null)
-                this.gameObject.AddComponent<GatherResource>();
+        var gatherResourceScript = this.gameObject.GetComponent<GatherResource>();
+        if (GatherResources && gatherResourceScript == null)
+        {            
+            this.gameObject.AddComponent<GatherResource>();
+            Debug.Log("Create Gather");
         }
-        else
+        else if (!GatherResources && gatherResourceScript != null)
         {
-            if (this.gameObject.GetComponent<GatherResource>())            
-                Destroy(this.gameObject.GetComponent<GatherResource>());            
+            Destroy(this.gameObject.GetComponent<GatherResource>());
+            Debug.Log("Destroy Gather");
         }
 
-        if (lightSource)
+        if (LightSource)
         {
             if (this.gameObject.GetComponent<LightSource>() == null)
                 this.gameObject.AddComponent<LightSource>();
@@ -133,7 +134,7 @@ public class Abilities : MonoBehaviour
                 Destroy(this.gameObject.GetComponent<LightSource>());
         }
 
-        if (feedFire)
+        if (FeedFire)
         {
             if (this.gameObject.GetComponent<FeedFire>() == null)
                 this.gameObject.AddComponent<FeedFire>();
@@ -145,7 +146,7 @@ public class Abilities : MonoBehaviour
                 Destroy(this.gameObject.GetComponent<FeedFire>());
         }
 
-        if (consumeFire)
+        if (ConsumeFire)
         {
             if (this.gameObject.GetComponent<ConsumeFire>() == null)
                 this.gameObject.AddComponent<ConsumeFire>();
@@ -157,7 +158,7 @@ public class Abilities : MonoBehaviour
                 Destroy(this.gameObject.GetComponent<ConsumeFire>());
         }
 
-        if (cookSoup)
+        if (CookSoup)
         {
             if (this.gameObject.GetComponent<CookSoup>() == null)
                 this.gameObject.AddComponent<CookSoup>();
@@ -169,7 +170,7 @@ public class Abilities : MonoBehaviour
                 Destroy(this.gameObject.GetComponent<CookSoup>());
         }
 
-        if (collectItems)
+        if (CollectItems)
         {
             if (this.gameObject.GetComponent<CollectItems>() == null)
                 this.gameObject.AddComponent<CollectItems>();
@@ -181,7 +182,7 @@ public class Abilities : MonoBehaviour
                 Destroy(this.gameObject.GetComponent<CollectItems>());
         }
 
-        if (constructBuilding)
+        if (ConstructBuilding)
         {
             if (this.gameObject.GetComponent<ConstructBuilding>() == null)
                 this.gameObject.AddComponent<ConstructBuilding>();

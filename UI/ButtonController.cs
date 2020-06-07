@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class ButtonController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    Button _button;
+    Button _btn;
+    TextMeshProUGUI _btnText;
     void Start()
     {
-        _button = GetComponent<Button>();
-        _button.onClick.RemoveAllListeners();
-        _button.onClick.AddListener(EndTurn);
+        _btn = GetComponent<Button>();
+        _btnText = _btn.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        _btn.onClick.RemoveAllListeners();
+        _btn.onClick.AddListener(EndTurn);
     }
 
 
     private void EndTurn()
     {
-        Debug.Log("Player Turn End.");
-        Talker.TypeThis("The darkness slowly creeps in...");
-
-        ResourceManager.EndBurn(1);
+        GameManager.current.EndTurn();
+        _btnText.text = GameManager.current.gameState.ToString();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -32,5 +33,11 @@ public class ButtonController : MonoBehaviour, IPointerEnterHandler, IPointerExi
     {
         //Debug.Log("Mouse exited Button");
         EventHandler.current.HoverOverUIEnd();
+    }
+
+
+    private void OnDestroy()
+    {
+        _btn.onClick.RemoveAllListeners();
     }
 }

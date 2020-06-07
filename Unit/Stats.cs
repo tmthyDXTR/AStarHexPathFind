@@ -6,6 +6,8 @@ public class Stats : MonoBehaviour
 {
     [Header("Base Values")]
     [SerializeField]
+    private int baseMaxHealth = 1;
+    [SerializeField]
     private int baseMoveRange = 1;
     [SerializeField]
     private int baseLightRange = 1;
@@ -18,6 +20,8 @@ public class Stats : MonoBehaviour
 
     [Header("Modifiers")]
     [SerializeField]
+    private int maxHealthMod = 0;
+    [SerializeField]
     private int moveRangeMod = 0;
     [SerializeField]
     private int lightRangeMod = 0;
@@ -29,6 +33,11 @@ public class Stats : MonoBehaviour
     private int fireDmgMod = 0;
 
     #region Actual value Get
+    public int GetMaxHealth
+    {
+        get { return baseMaxHealth + maxHealthMod; }
+    }
+
     public int GetMoveRange
     {
         get { return baseMoveRange + moveRangeMod; }
@@ -53,6 +62,11 @@ public class Stats : MonoBehaviour
     #endregion
 
     #region Modifiers GetSet
+    public void MaxHealthMod(int valueChange)
+    {
+        maxHealthMod += valueChange;
+        EventHandler.current.StatsChanged();
+    }
     public void MoveRangeMod(int valueChange)
     {
         moveRangeMod += valueChange;

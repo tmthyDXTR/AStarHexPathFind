@@ -12,6 +12,7 @@ public class PanelController : MonoBehaviour
     private GameObject buildingTabPrefab;
     private GameObject inventoryTabPrefab;
     private GameObject unitInventoryTabPrefab;
+    private GameObject unitSkillTabPrefab;
 
 
     // Runtime instantiated panels
@@ -27,6 +28,8 @@ public class PanelController : MonoBehaviour
     GameObject inventoryTab;
     [SerializeField]
     GameObject unitInventoryTab;
+    [SerializeField]
+    GameObject unitSkillTab;
 
     void Start()
     {
@@ -36,13 +39,14 @@ public class PanelController : MonoBehaviour
         buildingTabPrefab = (GameObject)Resources.Load("UI/BuildingTab");
         inventoryTabPrefab = (GameObject)Resources.Load("UI/UI_Inventory");
         unitInventoryTabPrefab = (GameObject)Resources.Load("UI/UI_UnitInventory");
+        unitSkillTabPrefab = (GameObject)Resources.Load("UI/UI_UnitSkillTab");
 
         EventHandler.current.onFireConsumed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
         EventHandler.current.onFireFed += () => CreateMouseHoverPanel(SelectionManager.hoveredTile);
         EventHandler.current.onHoverOverTile += CreateMouseHoverPanel;
         //EventHandler.current.onTileSelected += CreateMouseHoverPanel;
         EventHandler.current.onDeselectedAll += DestroyAllPanels;
-        EventHandler.current.onResourceDestroyed -= () => SysHelper.WaitForAndExecute(0.5f, () => CreateMouseHoverPanel(SelectionManager.hoveredTile));
+        EventHandler.current.onResourceDestroyed += () => SysHelper.WaitForAndExecute(0.5f, () => CreateMouseHoverPanel(SelectionManager.hoveredTile));
         EventHandler.current.onHoverOverDarkness += CreateMouseHoverPanel;
 
         EventHandler.current.onOpenedBuildingTab += CreateBuildingTab;
@@ -53,6 +57,7 @@ public class PanelController : MonoBehaviour
         EventHandler.current.onItemEquipped += CreateInventoryTab;
         EventHandler.current.onItemUnequipped += CreateInventoryTab;
 
+        EventHandler.current.onUnitSelected += CreateUnitUI;
     }
     private void OnDestroy()
     {
@@ -70,6 +75,9 @@ public class PanelController : MonoBehaviour
         EventHandler.current.onConstructionWorkDone -= CreateMouseHoverPanel;
         EventHandler.current.onItemEquipped -= CreateInventoryTab;
         EventHandler.current.onItemUnequipped -= CreateInventoryTab;
+
+        EventHandler.current.onUnitSelected -= CreateUnitUI;
+
 
     }
     private void DestroyAllPanels()
@@ -98,6 +106,10 @@ public class PanelController : MonoBehaviour
         {
             GameObject.Destroy(unitInventoryTab);
         }
+        if (unitSkillTab)
+        {
+            GameObject.Destroy(unitSkillTab);
+        }
     }
 
     private void CreateBuildingTab()
@@ -109,19 +121,28 @@ public class PanelController : MonoBehaviour
     }
     private void CreateInventoryTab()
     {
-        DestroyAllPanels();
-        //var panelPos = new Vector3(SelectionManager.hoveredTile.transform.position.x, 4.25f, SelectionManager.hoveredTile.transform.position.z);
-        //inventoryTab = Instantiate(inventoryTabPrefab, panelPos, Camera.main.transform.rotation, GameObject.Find("UI_PanelCanvas").transform);
         unitInventoryTab = Instantiate(unitInventoryTabPrefab, GameObject.Find("UI_PanelCanvas").transform);
 
         inventoryTab = Instantiate(inventoryTabPrefab, GameObject.Find("UI_PanelCanvas").transform);
-        //inventoryTab.GetComponent<InventoryTab>().UpdateInventoryTab();
-        //var unitPanelPos = new Vector3(SelectionManager.hoveredTile.transform.position.x-10, 4.25f, SelectionManager.hoveredTile.transform.position.z);
-        //unitInventoryTab = Instantiate(unitInventoryTabPrefab, unitPanelPos, Camera.main.transform.rotation, GameObject.Find("UI_PanelCanvas").transform);
-        //unitInventoryTab.GetComponent<UnitInventoryTab>().UpdateUnitInventoryTab();
+        EventHandler.current.HoverOverUIStart();
     }
 
-
+    private void CreateUnitUI(Unit unit)
+    {
+        DestroyAllPanels();
+        CreateUnitInventoryTab(unit);
+        CreateUnitSkillTab(unit);
+    }
+    private void CreateUnitInventoryTab(Unit unit)
+    {
+        unitInventoryTab = Instantiate(unitInventoryTabPrefab, GameObject.Find("UI_PanelCanvas").transform);
+        unitInventoryTab.transform.position += new Vector3(-120, -120, 0);
+    }
+    private void CreateUnitSkillTab(Unit unit)
+    {
+        unitSkillTab = Instantiate(unitSkillTabPrefab, GameObject.Find("UI_PanelCanvas").transform);
+        unitSkillTab.transform.position += new Vector3(0, -120, 0);
+    }
 
     private void CreateMouseHoverPanel(Tile tile)
     {

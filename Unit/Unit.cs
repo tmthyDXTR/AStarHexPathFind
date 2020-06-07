@@ -10,6 +10,8 @@ public class Unit : MonoBehaviour
 {
     public Tile currTile;
     public Tile destTile;
+
+    public int health;
     public int moveRange;
     public int remainingMoves = 3;
 
@@ -38,6 +40,12 @@ public class Unit : MonoBehaviour
     private HashSet<CubeIndex> moveArea = new HashSet<CubeIndex>();
     public List<CubeIndex> path = new List<CubeIndex>();
 
+    public enum Id
+    {
+        LumberJack,
+
+    }
+
     void Start()
     {
         _selection = GameObject.Find("SelectionManager").GetComponent<SelectionManager>();
@@ -47,6 +55,7 @@ public class Unit : MonoBehaviour
 
         // Initialize Base Stats
         moveRange = _stats.GetMoveRange;
+        health = _stats.GetMaxHealth;
 
 
         EventHandler.current.onResourceDestroyed += () => StartThreadMoveAreaCalculation(currTile.index, _stats.GetMoveRange);

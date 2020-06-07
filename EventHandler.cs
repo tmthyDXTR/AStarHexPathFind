@@ -14,6 +14,16 @@ public class EventHandler : MonoBehaviour
 
 
     // Events
+    public event Action<Skill> onSkillSelected;
+    public void SkillSelected(Skill skill)
+    {
+        if (onSkillSelected != null)
+        {
+            onSkillSelected(skill);
+        }
+    }
+
+
     public event Action onAbilitiesChanged;
     public void AbilitiesChanged()
     {
@@ -29,6 +39,33 @@ public class EventHandler : MonoBehaviour
         if (onStatsChanged != null)
         {
             onStatsChanged();
+        }
+    }
+
+    public event Action<InventorySlot> onItemDroppedInUnitInventory;
+    public void ItemDroppedInUnitInventory(InventorySlot slot)
+    {
+        if (onItemDroppedInUnitInventory != null)
+        {
+            onItemDroppedInUnitInventory(slot);
+        }
+    }
+
+    public event Action onItemAddedToInventory;
+    public void ItemAddedToInventory()
+    {
+        if (onItemAddedToInventory != null)
+        {
+            onItemAddedToInventory();
+        }
+    }
+
+    public event Action onItemRemovedFromInventory;
+    public void ItemRemovedFromInventory()
+    {
+        if (onItemRemovedFromInventory != null)
+        {
+            onItemRemovedFromInventory();
         }
     }
 

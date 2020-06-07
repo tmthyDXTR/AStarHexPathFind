@@ -7,6 +7,7 @@ public class Tile : MonoBehaviour {
 	{
 		Default,
 		Grass,
+		Water,
 		Tree,
 		Stone,
 		OldTree,
@@ -21,7 +22,7 @@ public class Tile : MonoBehaviour {
 	public Property property;
 
 
-	public ItemManager.ID item;
+	public ItemManager.ItemId item;
 
 	public enum SelectionStatus
 	{

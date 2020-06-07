@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.PlayerLoop;
+using UnityEngine.UI;
 
 public class InventorySlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -15,8 +17,9 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
         Curiosity,
     }
 
+
     private GameObject nameBox;
-    private RectTransform currItemBox;
+    private RectTransform currNameBox;
 
     private void OnEnable()
     {
@@ -25,35 +28,91 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, 
 
     public void OnDrop(PointerEventData eventData)
     {
-        Debug.Log("On Drop");
+        var droppedItem = ItemDrag.current.GetItem();
+        //this.item = droppedItem;
+
         if (eventData.pointerDrag != null)
         {
-            eventData.pointerDrag.GetComponent<Transform>().position = GetComponent<Transform>().position;
+            Debug.Log("OnDrop");
+            //eventData.pointerDrag.GetComponent<Transform>().position = GetComponent<Transform>().position;
+
+            //UpdateVisual(item);
         }
+        switch (type)
+        {
+            case Type.Bagpack:
+                Debug.Log("Dropped: " + droppedItem + " in Bagpack slot");
+                if (!ItemDrag.current.fromBagpack)
+                {
+                    InventoryManager.AddItemToInventory(droppedItem);
+                    this.item = droppedItem;
+                    UpdateVisual(item);
+                    ClearSlot(ItemDrag.current.draggedSlot);
+                }
+                break;
+            case Type.Weapon:
+                Debug.Log("Dropped: " + droppedItem + " in Weapon slot");
+                if (ItemDrag.current.fromBagpack)
+                {
+                    InventoryManager.RemoveItemFromInventory(droppedItem);
+                    this.item = droppedItem;
+                    UpdateVisual(item);
+                }
+                EventHandler.current.ItemDroppedInUnitInventory(this);
+
+                break;
+            case Type.Curiosity:
+                Debug.Log("Dropped: " + droppedItem + " in Curiosity slot");
+                if (ItemDrag.current.fromBagpack)
+                {
+                    InventoryManager.RemoveItemFromInventory(droppedItem);
+                    this.item = droppedItem;
+                    UpdateVisual(item);
+                }
+                EventHandler.current.ItemDroppedInUnitInventory(this);
+
+                break;
+
+        }
+
+        ItemDrag.current.ResetDrag();
+
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("Mouse enter inv item");
         // Fix namebox positioning     
-        currItemBox = Instantiate(nameBox, this.transform.position, Quaternion.identity, transform.parent.parent).GetComponent<RectTransform>();
-        currItemBox.anchoredPosition = new Vector2(0, 30);
+        currNameBox = Instantiate(nameBox, this.transform.position, Quaternion.identity, transform.parent.parent).GetComponent<RectTransform>();
+        currNameBox.anchoredPosition = new Vector2(0, 30);
         if (item != null)
         {
-            currItemBox.Find("NameText").GetComponent<TextMeshProUGUI>().text = item.nameText;
+            currNameBox.Find("NameText").GetComponent<TextMeshProUGUI>().text = item.nameText;
         }
         else
         {
-            currItemBox.Find("NameText").GetComponent<TextMeshProUGUI>().text = type + " Slot";
+            currNameBox.Find("NameText").GetComponent<TextMeshProUGUI>().text = type + " Slot";
         }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log("Mouse exit inv item");
-        if (currItemBox)
+        if (currNameBox)
         {
-            GameObject.Destroy(currItemBox.gameObject);
+            GameObject.Destroy(currNameBox.gameObject);
         }
+    }
+
+    void UpdateVisual(Item item)
+    {
+        Debug.Log("Update Visual.");
+        transform.Find("Image").gameObject.SetActive(true);
+        transform.Find("Image").GetComponent<Image>().sprite = item.sprite;
+    }
+
+    void ClearSlot(InventorySlot slot) 
+    {
+        Debug.Log("Clear Slot.");
+        slot.item = null;
+        slot.transform.Find("Image").gameObject.SetActive(false);
     }
 }

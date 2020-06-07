@@ -11,6 +11,8 @@ public class SelectionManager : MonoBehaviour
     /// This class handles the selection through input
     /// </summary>
     /// 
+    public static SelectionManager current;
+    
     private Grid _grid;
     private Selectable _selectable;
 
@@ -46,6 +48,7 @@ public class SelectionManager : MonoBehaviour
 
     void Start()
     {
+        current = this;
         _grid = GameObject.Find("HexGen").GetComponent<Grid>();
         //_aStar = _grid.GetComponent<AStarSearch>();
         // Events
@@ -78,7 +81,7 @@ public class SelectionManager : MonoBehaviour
         {
             DeselectAll();
         }
-        if (IsActive)
+        if (IsActive && GameManager.current.gameState == GameManager.GameState.PlayerTurn)
         {            
             if (Input.GetMouseButtonDown(0))
             {
@@ -113,7 +116,7 @@ public class SelectionManager : MonoBehaviour
                             Select(clickedObj);
                         }
                         // Move?
-                        if (highlightArea.Count > 0 && highlightArea.Contains(hoveredTile) && !currentSelected[0].GetComponent<Unit>().destTile && hoveredTile.tag == TagHandler.walkGroundString && hoveredTile.item == ItemManager.ID.None)
+                        if (highlightArea.Count > 0 && highlightArea.Contains(hoveredTile) && !currentSelected[0].GetComponent<Unit>().destTile && hoveredTile.tag == TagHandler.walkGroundString && hoveredTile.item == ItemManager.ItemId.None)
                         {
                             neighbours.Clear();
                             var unit = currentSelected[0].GetComponent<Unit>();
@@ -138,10 +141,10 @@ public class SelectionManager : MonoBehaviour
                                     //SysHelper.WaitForAndExecute(1f, () => UpdateNeighboursAndHighlightArea(currentSelected[0].GetComponent<Unit>()));
                             }
                             // Collect Item?
-                            else if (hoveredTile.item != ItemManager.ID.None)
+                            else if (hoveredTile.item != ItemManager.ItemId.None)
                             {
-                                InventoryManager.AddItemToInventory(ItemManager.itemDict[hoveredTile.item]);
-                                hoveredTile.item = ItemManager.ID.None;
+                                InventoryManager.AddItemToInventory(ItemManager.current.itemDict[hoveredTile.item], 1, true);
+                                hoveredTile.item = ItemManager.ItemId.None;
                                 GameObject objToDestroy = null;
                                 foreach (Transform child in hoveredTile.transform)
                                 {
@@ -336,7 +339,7 @@ public class SelectionManager : MonoBehaviour
         {
             foreach (var neighbour in allNeighbours)
             {
-                if (neighbour.GetComponent<Tile>().item != ItemManager.ID.None && !neighbours.Contains(neighbour))
+                if (neighbour.GetComponent<Tile>().item != ItemManager.ItemId.None && !neighbours.Contains(neighbour))
                 {
                     neighbours.Add(neighbour);
                 }
